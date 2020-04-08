@@ -3,7 +3,6 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-from flask import Flask
 import os
 
 
@@ -38,9 +37,10 @@ def country(country_name):
 ################## DASH PORTION ########################################################################################################
 ########################################################################################################################################
 ########################################################################################################################################
-server = Flask(__name__)
-server.secret_key = os.environ.get('secret_key', 'secret')
+
+
 app = dash.Dash(name = __name__, server = server)
+server = app.server
 app.config.supress_callback_exceptions = True
 
 
@@ -151,6 +151,7 @@ def the_virus_graph(country_dropdown_value, metric_dropdown_value):
         }
 
 
-
+if __name__ =='__main__':
+    app.run_server(debug = True)
 
 ####
