@@ -1,9 +1,12 @@
-import pandas as pd
+import os
+
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-import os
+
+import numpy as np
+import pandas as pd
 
 
 ########################################################################################################################################
@@ -39,9 +42,12 @@ def country(country_name):
 ########################################################################################################################################
 
 
-app = dash.Dash(name = __name__, server = server)
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+
 server = app.server
-app.config.supress_callback_exceptions = True
+#app.config.supress_callback_exceptions = True
 
 
 
@@ -151,7 +157,7 @@ def the_virus_graph(country_dropdown_value, metric_dropdown_value):
         }
 
 
-if __name__ =='__main__':
+if __name__ == '__main__':
     app.run_server(debug = True)
 
 ####
