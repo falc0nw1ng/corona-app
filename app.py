@@ -25,16 +25,6 @@ country_list = df['Country_Region'].unique()
 metrics_list = ['Daily Cases', 'Cumulative Cases', 'Daily Deaths', 'Cumulative Deaths']
 
 
-#### function that takes country input, and returns the number of daily confirmed cases in the form of a dataframe/series
-#### which has date as the index
-def country(country_name):
-    country_df = df[df['Country_Region'] == country_name]
-    confirmed_df = country_df[country_df['Case_Type'] == 'Confirmed']
-    sorted_df = confirmed_df.sort_values('Date', ascending = True)
-    sum_df = sorted_df.groupby('Date').sum()['Difference']
-    return sum_df
-
-
 ########################################################################################################################################
 ########################################################################################################################################
 ################## DASH PORTION ########################################################################################################

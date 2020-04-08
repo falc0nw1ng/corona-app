@@ -1,0 +1,78 @@
+
+body {
+    font-family: arial;
+    background-color: 'rgb(255,255,255)'
+    height:100%;
+
+    /* rgb(240,240,240) is the gray used*/
+}
+
+
+.header h1{
+  font: 40px Arial Black, sans-serif;
+  border-bottom:3px black solid;
+}
+
+/*graph1*/
+.middle-block .graph1-options p{
+  text-align: center;
+}
+
+.middle-block .graph1-options {
+  width:43%;
+  float:left;
+}
+
+/*graph2*/
+.middle-block .graph2-options p{
+  text-align: center;
+}
+
+.middle-block .graph2-options {
+  width:43%;
+  float:left;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**/
