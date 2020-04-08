@@ -38,8 +38,8 @@ total_cases = confirmed_cases.Difference.sum()
 
 
 app = dash.Dash(__name__)
-app.config.suppress_callback_exceptions = True
-#server = app.server #uncomment this for deployment
+#app.config.suppress_callback_exceptions = True
+server = app.server #uncomment this for deployment
 
 
 
