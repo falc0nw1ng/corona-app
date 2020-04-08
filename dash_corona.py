@@ -37,8 +37,13 @@ def country(country_name):
 ################## DASH PORTION ########################################################################################################
 ########################################################################################################################################
 ########################################################################################################################################
-app = dash.Dash()
-server = app.server
+server = Flask(__name__)
+server.secret_key = os.environ.get('secret_key', 'secret')
+app = dash.Dash(name = __name__, server = server)
+app.config.supress_callback_exceptions = True
+
+
+
 
 app.layout = html.Div([
     html.Div(
@@ -143,35 +148,6 @@ def the_virus_graph(country_dropdown_value, metric_dropdown_value):
                 }
             ]),
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-if __name__ =="__main__":
-    app.run_server(debug = False)
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
