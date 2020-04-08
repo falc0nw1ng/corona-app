@@ -1,8 +1,4 @@
-import os
 import pandas as pd
-import numpy as np
-import collections
-import re
 import matplotlib.pyplot as plt
 
 import dash
@@ -43,7 +39,8 @@ def country(country_name):
 ################## DASH PORTION ########################################################################################################
 ########################################################################################################################################
 ########################################################################################################################################
-app = dash.Dash(__name__)
+app = dash.Dash()
+server = app.server
 
 app.layout = html.Div([
     html.Div(
