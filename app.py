@@ -136,7 +136,7 @@ country_layout = html.Div(
                     id = 'country_dropdown',
                     options =  [{'label':i, 'value':i} for i in country_list],
                     value = "Canada",
-                    style = {'width':'150px'}
+                    style = {'width':'80%'}
                 )
             ], style = {'display':'inline', 'float':'left', 'padding-left':'10px', 'width':'9%'}
             ),
@@ -146,7 +146,7 @@ country_layout = html.Div(
                     id = 'metric_dropdown',
                     options = [{'label':i, 'value':i} for i in metrics_list],
                     value = 'Daily Cases',
-                    style = {'width':'150px'}
+                    style = {'width':'80%'}
                 ),
                 dcc.RadioItems(
                     id = 'log_radio',
@@ -196,7 +196,6 @@ country_layout = html.Div(
 '''
 leading_layout = html.Div(
     children = [
-
     ]
 )
 '''
