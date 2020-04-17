@@ -87,7 +87,7 @@ global_layout = html.Div(
                                 id = 'metric_dropdown',
                                 options = [{'label':i, 'value':i} for i in metrics_list],
                                 value = 'Daily Cases',
-                                style = {'width':'160px'}
+                                style = {'width':'150px'}
                             ),
                             dcc.RadioItems(
                                 id = 'log_radio',
@@ -136,7 +136,7 @@ country_layout = html.Div(
                     id = 'country_dropdown',
                     options =  [{'label':i, 'value':i} for i in country_list],
                     value = "Canada",
-                    style = {'width':'160px'}
+                    style = {'width':'150px'}
                 )
             ], style = {'display':'inline-block', 'float':'left', 'padding-left':'50px', 'width':'9%'}
             ),
@@ -146,7 +146,7 @@ country_layout = html.Div(
                     id = 'metric_dropdown',
                     options = [{'label':i, 'value':i} for i in metrics_list],
                     value = 'Daily Cases',
-                    style = {'width':'160px'}
+                    style = {'width':'150px'}
                 ),
                 dcc.RadioItems(
                     id = 'log_radio',
@@ -168,7 +168,7 @@ country_layout = html.Div(
                 html.Div(id = 'total_country_deaths', style = {'display':'inline', 'float':'left', 'width': '15%', 'textAlign':'center',
                     'backgroundColor':'white', 'box-shadow': '2px 2px 2px lightgray', 'border-radius':'5px', 'margin':'0 5px 5px 5px',
                     'border-color':'crimson', 'border-style': 'solid'})
-            ],style = {'display':'inline', 'width': '90%', 'vertical-align':'top'}),
+            ],style = {'display':'inline', 'width': '90%', 'vertical-align':'top', 'padding-left':'10%'}),
         ],style = {'vertical-align':'top', 'width':'100%'}
         ),
         html.Div(
@@ -180,7 +180,7 @@ country_layout = html.Div(
         ),
     html.Div([
         dcc.Graph(id = 'pie_graph')
-    ], style = {'float':'left', 'wdith': '28%',}
+    ], style = {'float':'left', 'wdith': '25%',}
     )
 ], style = {'vertical-align':'top'}
 )
