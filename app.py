@@ -138,7 +138,7 @@ country_layout = html.Div(
                     value = "Canada",
                     style = {'width':'150px'}
                 )
-            ], style = {'display':'inline-block', 'float':'left', 'padding-left':'50px', 'width':'9%'}
+            ], style = {'display':'inline', 'float':'left', 'padding-left':'10px', 'width':'9%'}
             ),
             html.Div([
                 html.P('Metrics'),
@@ -152,9 +152,9 @@ country_layout = html.Div(
                     id = 'log_radio',
                     options = [{'label':i, 'value':i} for i in ['Linear', 'Log']],
                     value = 'Linear',
-                    labelStyle = {'display':'inline-block',}
+                    labelStyle = {'display':'inline',}
                     ),
-            ], style = {'display':'inline-block', 'float':'left', 'padding-left':'50px', 'width':'9%'}),
+            ], style = {'display':'inline-block', 'float':'left', 'width':'9%'}),
             html.Div([
                 html.Div(id = 'daily_country_cases', style = {'display':'inline', 'float':'left', 'width': '15%', 'textAlign':'center',
                     'backgroundColor':'white', 'box-shadow': '2px 2px 2px lightgray', 'border-radius':'5px', 'margin':'0 5px 5px 5px',
@@ -173,15 +173,22 @@ country_layout = html.Div(
         ),
         html.Div(
             children = [
-                dcc.Graph(id = 'virus_graph',),
+                html.Div([
+                    dcc.Graph(id = 'virus_graph',)
+                ], style = {'display':'inline-block', 'width':'60%'}),
+                html.Div([
+                    dcc.Graph(id = 'pie_graph')
+                ], style = {'display':'inline-block', 'width':'25%', 'padding-right':'10px'})
+
         ],
             style = {
-                'width':'60%', 'float':'left',}
+             'display':'inline-block', 'width':'100%'}
         ),
-    html.Div([
-        dcc.Graph(id = 'pie_graph')
-    ], style = {'float':'left', 'wdith': '25%',}
-    )
+###'''    html.Div([
+###        dcc.Graph(id = 'pie_graph')
+###    ], style = {'float':'left', 'wdith': '25%','display':'inline'}
+###    )'''
+
 ], style = {'vertical-align':'top'}
 )
 
