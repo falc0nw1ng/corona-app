@@ -217,7 +217,7 @@ country_layout = html.Div([
     html.Div([
         html.H2('What is the scaled case?',
             style = {'fontWeight':'bold', 'font-size':'35px', 'color':'white', 'textAlign':'center'}),
-        html.P('The scaled case is a simple metric to tell you how a country is doing against the spread of the virus. It acomplishes this by scaling cases by the number of tests. Often times when the media is announcing new cases or deaths, it does not take into account the testing done. By scaling the cases with the number of tests, we can get a more accurate portrayal of how much the virus has spread relative to each other.', style = {'color':'white', 'font-size':'25px'})
+        html.P('The scaled case is a simple metric to tell you how a country is doing against the spread of the virus. It acomplishes this by scaling cases by the number of tests. Often times when the media is announcing new cases or deaths, it does not take into account the testing done. By scaling the cases with the number of tests, we can get a more accurate portrayal of how much the virus has spread in each country relative to each other. The same rule applies here as for most other Coronavirus graphs, bigger number = bad!', style = {'color':'white', 'font-size':'25px'})
     ], style = {'color':'white'}),
     html.Div([
         dcc.Dropdown(
