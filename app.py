@@ -28,7 +28,33 @@ total_cases = confirmed_cases.Difference.sum()
 death_cases = df[df['Case_Type'] =='Deaths']
 total_deaths = death_cases.Difference.sum()
 
+### daily deaths and cases
+
+most_recent_date = df.Date.max()
+recent_df = df[df['Date'] == df.Date.max()]
+recent_cases = recent_df[recent_df['Case_Type'] == 'Confirmed']
+recent_deaths = recent_df[recent_df['Case_Type'] == 'Deaths']
+
+daily_global_cases = recent_cases.Difference.sum()
+daily_global_deaths = recent_deaths.Difference.sum()
+
+
 ##maybe do this part as a callback to prevent too much loading later
+
+#### this is the OWID data set which contains some testing data as well
+OWID_df = pd.read_csv("https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/owid-covid-data.csv")
+OWID_df[['total_cases', 'new_cases',
+       'total_deaths', 'new_deaths', 'total_cases_per_million',
+       'new_cases_per_million', 'total_deaths_per_million',
+       'new_deaths_per_million', 'total_tests', 'new_tests',
+       'total_tests_per_thousand', 'new_tests_per_thousand', 'tests_units']] = OWID_df[['total_cases', 'new_cases',
+       'total_deaths', 'new_deaths', 'total_cases_per_million',
+       'new_cases_per_million', 'total_deaths_per_million',
+       'new_deaths_per_million', 'total_tests', 'new_tests',
+       'total_tests_per_thousand', 'new_tests_per_thousand', 'tests_units']].fillna(0)
+
+have_test_data = OWID_df[OWID_df['total_tests_per_thousand']>0]
+second_country_list = have_test_data.sort_values(by = 'location')
 
 
 ########################################################################################################################################
@@ -36,19 +62,21 @@ total_deaths = death_cases.Difference.sum()
 ########################################################################################################################################
 
 
-
 tab_style = {
-    'borderBottom': '1px solid #d6d6d6',
+    'borderBottom': '1px solid white',
     'padding': '6px',
     'font-size': '20px',
     'font-family':'bold',
-    'margin':'auto'
+    'margin':'auto',
+    'border':'1px solid white',
+    'backgroundColor':'#333333',
+    'color':'white'
 }
 
 tab_selected_style = {
     'borderTop': '1px solid #d6d6d6',
     'borderBottom': '1px solid #d6d6d6',
-    'backgroundColor': '#119DFF',
+    'backgroundColor': '#cf082f',
     'color': 'white',
     'padding': '6px',
     'font-size': '20px',
@@ -64,132 +92,151 @@ app.layout = html.Div([
     html.Div(
         children = [
             html.H1('Just Another Coronavirus Dashboard',
-                style = {'font-family':'Helvetica narrow, sans-serif', 'fontWeight':'lighter'})
+                style = {'font-family':'Helvetica narrow, sans-serif', 'fontWeight':'lighter', 'color':'white'})
         ]),
-    dcc.Tabs(id = 'tabs', value = 'country' ,
+    dcc.Tabs(id = 'tabs', value = 'country',
         children = [
             dcc.Tab(label = 'Global', value = 'global', style = tab_style, selected_style = tab_selected_style),
             dcc.Tab(label = 'By Country', value = 'country', style = tab_style, selected_style = tab_selected_style),
         #    dcc.Tab(label = 'Leading Statistics', value = 'leading', style = tab_style, selected_style = tab_selected_style)
         ],style = {'height':'60px'}),
     html.Div(id = 'render_page')
-],# style = {'backgroundColor':'#f7f9f9'}
+],style = {'width':'80%', 'margin':'auto', 'backgroundColor':'#333333', 'height':'100%'}
 )
 
-global_layout = html.Div(
+
+
+global_layout = html.Div([
+    html.Div([
+        html.Div([
+            html.P('Daily Cases:'),
+            html.P(daily_global_cases)
+        ], style = {'textAlign':'center', 'box-shadow': '2px 2px 2px lightgray', 'font-size':'25px', 'width':'25%', 'float':'left'}
+        ),
+        html.Div([
+            html.P('Daily Deaths'),
+            html.P(daily_global_deaths)
+        ],style = {'textAlign':'center','box-shadow': '2px 2px 2px lightgray', 'font-size':'25px', 'width':'25%', 'float':'left'}
+        ),
+        html.Div([
+            html.P('Total Cases:'),
+            html.P(total_cases)
+        ], style = {'textAlign':'center', 'box-shadow': '2px 2px 2px lightgray', 'font-size':'25px', 'width':'25%', 'float':'left'}
+        ),
+        html.Div([
+            html.P('Total Deaths:'),
+            html.P(total_deaths),
+        ], style = {'textAlign':'center','box-shadow': '2px 2px 2px lightgray', 'font-size':'25px', 'width':'25%', 'float':'left'}
+        ),
+    ],style = {'vertical-align':'top', 'width':'100%', 'color':'white', 'backgroundColor':'#333333'}
+        ),
+    html.Div([
+        html.P('Select a desired metric',
+        style = {'color':'white', 'font-size':'20px'}
+        ),
+        dcc.Dropdown(
+            id = 'metric_dropdown',
+            options = [{'label':i, 'value':i} for i in metrics_list],
+            value = 'Daily Cases',
+            style = {'width':'35%'}
+        ),
+        dcc.RadioItems(
+            id = 'log_radio',
+            options = [{'label':i, 'value':i} for i in ['Linear', 'Log']],
+            value = 'Linear',
+            style = {'color':'white'}
+        ),
+        ], style = {'width':'100%'}),
+    html.Div(
         children = [
-            html.Div(
-                children = [
-                    html.Div(
-                        children  = [
-                            html.P('Metrics'),
-                            dcc.Dropdown(
-                                id = 'metric_dropdown',
-                                options = [{'label':i, 'value':i} for i in metrics_list],
-                                value = 'Daily Cases',
-                                style = {'width':'150px'}
-                            ),
-                            dcc.RadioItems(
-                                id = 'log_radio',
-                                options = [{'label':i, 'value':i} for i in ['Linear', 'Log']],
-                                value = 'Linear',
-                                labelStyle = {'display':'inline-block'}
-                            ),
-                        ], style = {'display':'inline-block', 'float':'left', 'padding-left':'50px', 'width':'13%'}
-                        ),
-### add daily cases here if needed?
-                    html.Div(
-                        children = [
-                            html.P('Cases:', style = {'font-size':'25px'}),
-                            html.P(total_cases, style = {'font-size': '25px'})
-                    ], style = {'display':'inline', 'float':'left', 'width': '15%', 'textAlign':'center',
-                        'backgroundColor':'white', 'box-shadow': '2px 2px 2px lightgray', 'border-radius':'5px', 'margin':'0 5px 5px 5px',
-                            'border-color':'lightgreen', 'border-style': 'solid' }
-                    ),
-                    html.Div(
-                        children = [
-                            html.P('Deaths:', style = {'font-size':'25px'}),
-                            html.P(total_deaths, style = {'font-size': '25px'}
-                                    ),
-                    ], style = {'display':'inline', 'float':'left', 'width': '15%', 'textAlign':'center',
-                        'backgroundColor':'white', 'box-shadow': '2px 2px 2px lightgray', 'border-radius':'5px',
-                            'border-color':'crimson', 'border-style': 'solid'}
-                                ),
-                ],style = { 'float':'left', 'width':'100%', 'margin':'auto'}
-            ),
-            html.Div(
-                children = [
-                    dcc.Graph(id = 'world_graph',)
-                ],
-                style = {'width':'100%','float':'left'}
-                )
-        ],style = {'backgroundColor':'#f7f9f9'})
+            dcc.Graph(id = 'world_graph')
+        ],
+        style = {'width':'100%'}
+        )
+    ],style = {'backgroundColor':'#333333'})
 
 ####### country Layout
-
-country_layout = html.Div(
-    children = [
+country_layout = html.Div([
+    html.Div([
+        html.Div(id = 'daily_country_cases', style = { 'width': '12%', 'textAlign':'center',
+         'box-shadow': '2px 2px 2px lightgray', 'display':'table-cell'}),
+        html.Div(id = 'daily_country_deaths', style = {'width': '12%', 'textAlign':'center',
+         'box-shadow': '2px 2px 2px lightgray', 'display':'table-cell'}),
+        html.Div(id = 'total_country_cases', style = {'width': '12%', 'textAlign':'center',
+         'box-shadow': '2px 2px 2px lightgray', 'display':'table-cell'}),
+        html.Div(id = 'total_country_deaths', style = {'width': '12%','textAlign':'center',
+         'box-shadow': '2px 2px 2px lightgray', 'display':'table-cell'})
+    ],style = {'vertical-align':'top', 'width':'100%', 'color':'white', 'backgroundColor':'#333333'}
+    ),
+    html.Div([
         html.Div([
-            html.Div([
-                html.P('Pick a country here!'),
-                dcc.Dropdown(
-                    id = 'country_dropdown',
-                    options =  [{'label':i, 'value':i} for i in country_list],
-                    value = "Canada",
-                    style = {'width':'80%'}
-                )
-            ], style = {'display':'inline', 'float':'left', 'padding-left':'10px', 'width':'9%'}
+            html.P('Select a country and the displayed data you want here:',
+            style = {'font-size':'25px', 'color':'white'}
             ),
             html.Div([
-                html.P('Metrics'),
-                dcc.Dropdown(
-                    id = 'metric_dropdown',
-                    options = [{'label':i, 'value':i} for i in metrics_list],
-                    value = 'Daily Cases',
-                    style = {'width':'80%'}
-                ),
-                dcc.RadioItems(
-                    id = 'log_radio',
-                    options = [{'label':i, 'value':i} for i in ['Linear', 'Log']],
-                    value = 'Linear',
-                    labelStyle = {'display':'inline',}
+                    dcc.Dropdown(
+                        id = 'country_dropdown',
+                        options =  [{'label':i, 'value':i} for i in country_list],
+                        value = "Canada",
+                        style = {'width':'35%'}
                     ),
-            ], style = {'display':'inline-block', 'float':'left', 'width':'9%'}),
-            html.Div([
-                html.Div(id = 'daily_country_cases', style = {'display':'inline', 'float':'left', 'width': '15%', 'textAlign':'center',
-                    'backgroundColor':'white', 'box-shadow': '2px 2px 2px lightgray', 'border-radius':'5px', 'margin':'0 5px 5px 5px',
-                    'border-color':'lightgreen', 'border-style': 'solid'}),
-                html.Div(id = 'daily_country_deaths', style = {'display':'inline', 'float':'left', 'width': '15%', 'textAlign':'center',
-                    'backgroundColor':'white', 'box-shadow': '2px 2px 2px lightgray', 'border-radius':'5px', 'margin':'0 5px 5px 5px',
-                    'border-color':'lightblue', 'border-style': 'solid'}),
-                html.Div(id = 'total_country_cases', style = {'display':'inline', 'float':'left', 'width': '15%', 'textAlign':'center',
-                    'backgroundColor':'white', 'box-shadow': '2px 2px 2px lightgray', 'border-radius':'5px', 'margin':'0 5px 5px 5px',
-                    'border-color':'lightorange', 'border-style': 'solid'}),
-                html.Div(id = 'total_country_deaths', style = {'display':'inline', 'float':'left', 'width': '15%', 'textAlign':'center',
-                    'backgroundColor':'white', 'box-shadow': '2px 2px 2px lightgray', 'border-radius':'5px', 'margin':'0 5px 5px 5px',
-                    'border-color':'crimson', 'border-style': 'solid'})
-            ],style = {'display':'inline', 'width': '90%', 'vertical-align':'top', 'padding-left':'10%'}),
-        ],style = {'vertical-align':'top', 'width':'100%'}
+                    dcc.Dropdown(
+                        id = 'metric_dropdown',
+                        options = [{'label':i, 'value':i} for i in metrics_list],
+                        value = 'Daily Cases',
+                        style = {'width':'35%', 'padding-left':'10%'}
+                    ),
+            ],style = {'display':'flex', 'font-size':'20px'}
+            ),
+            dcc.RadioItems(
+                id = 'log_radio',
+                options = [{'label':i, 'value':i} for i in ['Linear', 'Log']],
+                value = 'Linear',
+                style = {'color':'white'}
+                ),
+        ], style = {'width':'100%', 'display':'inline-block'}
         ),
-        html.Div(
-            children = [
-                html.Div([
-                    dcc.Graph(id = 'virus_graph',)
-                ], style = {'display':'inline-block', 'width':'60%'}),
-                html.Div([
-                    dcc.Graph(id = 'pie_graph')
-                ], style = {'display':'inline-block', 'width':'25%', 'padding-right':'10px'})
 
-        ],
+        html.Div([
+            dcc.Graph(id = 'virus_graph',)
+        ], style = {'display':'inline-block', 'width':'100%'}
+        ),
+    ],
+    ),
+    html.Div([
+        dcc.Graph(id = 'pie_graph_country',
+            style = {'width':'75%'}
+            ),
+        html.Div(id = 'death_info',
             style = {
-             'display':'inline-block', 'width':'100%'}
-        ),
-###'''    html.Div([
-###        dcc.Graph(id = 'pie_graph')
-###    ], style = {'float':'left', 'wdith': '25%','display':'inline'}
-###    )'''
+                'color':'white', 'font-size':'18px', 'textAlign':'center', 'width':'20%', 'margin':'auto'}
+                )
+    ], style = {'display':'flex', 'width':'80%'}
+    ),
 
-], style = {'vertical-align':'top'}
+    html.Div([
+        html.H2('What is the scaled case?',
+            style = {'fontWeight':'bold', 'font-size':'35px', 'color':'white', 'textAlign':'center'}),
+        html.P('The scaled case is a simple metric to tell you how a country is doing against the spread of the virus. It acomplishes this by scaling cases by the number of tests. Often times when the media is announcing new cases or deaths, it does not take into account the testing done. By scaling the cases with the number of tests, we can get a more accurate portrayal of how much the virus has spread relative to each other.', style = {'color':'white', 'font-size':'25px'})
+    ], style = {'color':'white'}),
+    html.Div([
+        dcc.Dropdown(
+            id = 'scaled_dropdown',
+            options = [{'label':i, 'value':i} for i in second_country_list['location'].unique()],
+            value = 'Canada',
+            style = {'width':'35%'}
+        ),
+        dcc.Dropdown(
+            id = 'scaled_dropdown2',
+            options = [{'label':i, 'value':i} for i in second_country_list['location'].unique()],
+            value = 'United States',
+            style = {'width':'35%', 'padding-left':'10%'}
+        ),
+    ],style = {'display':'flex', 'width':'100%'}),
+    html.Div([
+        dcc.Graph(id = 'scaled_cases'),
+    ])
+], style = {'vertical-align':'top', 'backgroundColor':'#333333'}
 )
 
 ####### Leading Layout
@@ -201,6 +248,8 @@ leading_layout = html.Div(
 '''
 
 ##### update case and deaths for country
+#### this is the four boxes at the top of the country tab
+
 ## daily cases
 @app.callback(
     Output('daily_country_cases', 'children'),
@@ -259,7 +308,7 @@ def total_country_cases_update(country_dropdown_value):
     confirmed_df = country_df[country_df['Case_Type']=='Confirmed']
     return [
         html.Div([
-            html.P('Total cases in {}:' .format(country_dropdown_value),
+            html.P('Total cases in \n{}:' .format(country_dropdown_value),
                 style = {'font-size':'25px'}
                 ),
             html.P(confirmed_df.Difference.sum(),
@@ -287,40 +336,10 @@ def total_country_deaths_update(country_dropdown_value):
         ])
     ]
 
+##########################################################################################
+########## multi date dropdown graph #####################################################
+##########################################################################################
 
-############################################################################################################################################
-############################ Pie Graph #####################################################################################################
-############################################################################################################################################
-
-@app.callback(
-    Output('pie_graph', 'figure'),
-    [Input('country_dropdown', 'value')],
-)
-
-## death rates
-def the_pie_graph(country_dropdown_value):
-    country_df = df[df['Country_Region'] == country_dropdown_value]
-    confirmed_df = country_df[country_df['Case_Type'] == 'Confirmed']
-    death_df = country_df[country_df['Case_Type'] == 'Deaths']
-    confirmed = confirmed_df.Difference.sum()
-    deaths = death_df.Difference.sum()
-
-    return{
-        'data':([
-            {
-                'values':[confirmed, deaths] , 'type':'pie', 'labels':['Confirmed', 'Deaths'], 'marker' : {
-                    'colors':['lightgreen','red'],
-                    'line':{
-                        'color':'black',
-                        'width':'2'
-            }}}
-        ]),
-        'layout':{
-            'title':{
-                'text':'Death rate in {}' .format(country_dropdown_value)
-        }}}
-
-#### Country graph
 @app.callback(
     Output('virus_graph', 'figure'),
     [Input('country_dropdown', 'value'),
@@ -328,9 +347,8 @@ def the_pie_graph(country_dropdown_value):
     Input('log_radio', 'value')]
 )
 
-def the_virus_graph(country_dropdown_value, metric_dropdown_value, log_radio_value):
 
-    ### Daily Cases
+def the_virus_graph(country_dropdown_value, metric_dropdown_value, log_radio_value):
     if metric_dropdown_value == 'Daily Cases':
         country_df = df[df['Country_Region'] == country_dropdown_value]
         confirmed_df = country_df[country_df['Case_Type'] == 'Confirmed']
@@ -339,12 +357,11 @@ def the_virus_graph(country_dropdown_value, metric_dropdown_value, log_radio_val
         sum_df = sorted_df.groupby('Date').sum()['Difference']
         x = sum_df.index
         y = sum_df
-
         z = moving_average = sum_df.rolling(5).mean()
 
         return {
                 'data':([
-                    {'x':x, 'y':y, 'type':'bar', 'name':country_dropdown_value, 'mode':'lines+markers','markers':{
+                    {'x':x, 'y':y, 'type':'bar', 'name':country_dropdown_value, 'mode':'lines+markers', 'markers':{
                     }, 'marker':{
                             'color':'orange'
                     }},
@@ -360,15 +377,20 @@ def the_virus_graph(country_dropdown_value, metric_dropdown_value, log_radio_val
                     'title':{
                         'text':metric_dropdown_value
                     },
-                'type':'linear' if log_radio_value == 'Linear' else 'log',
+                    'type':'linear' if log_radio_value == 'Linear' else 'log',
+                    'gridcolor':'#b3b3b3'
                 },
                 'xaxis':{
                     'title':{
                         'text': 'Date'
-                    }
+                    }},
+                'plot_bgcolor':'#333333',
+                'paper_bgcolor':'#333333',
+                'font':{
+                    'color':'white'
                 },
-
-                }}
+                }
+            }
 
 
     ### Cumulative Cases
@@ -402,14 +424,20 @@ def the_virus_graph(country_dropdown_value, metric_dropdown_value, log_radio_val
                     'title':{
                         'text':metric_dropdown_value
                     },
-                'type':'linear' if log_radio_value == 'Linear' else 'log',
-            },
+                    'type':'linear' if log_radio_value == 'Linear' else 'log',
+                    'gridcolor':'#b3b3b3'
+                },
                 'xaxis':{
                     'title':{
                         'text': 'Date'
-                    }
+                    }},
+                'plot_bgcolor':'#333333',
+                'paper_bgcolor':'#333333',
+                'font':{
+                    'color':'white'
                 },
-            }}
+                }
+        }
     ### Daily Deaths
     elif metric_dropdown_value == 'Daily Deaths':
         country_df = df[df['Country_Region'] == country_dropdown_value]
@@ -441,14 +469,20 @@ def the_virus_graph(country_dropdown_value, metric_dropdown_value, log_radio_val
                     'title':{
                         'text':metric_dropdown_value
                     },
-                'type':'linear' if log_radio_value == 'Linear' else 'log',
+                    'type':'linear' if log_radio_value == 'Linear' else 'log',
+                    'gridcolor':'#b3b3b3'
                 },
                 'xaxis':{
                     'title':{
                         'text': 'Date'
-                    }
+                    }},
+                'plot_bgcolor':'#333333',
+                'paper_bgcolor':'#333333',
+                'font':{
+                    'color':'white'
                 },
-                }}
+                }
+        }
     ### Daily Deaths
     elif metric_dropdown_value == 'Cumulative Deaths':
         country_df = df[df['Country_Region'] == country_dropdown_value]
@@ -479,14 +513,146 @@ def the_virus_graph(country_dropdown_value, metric_dropdown_value, log_radio_val
                     'title':{
                         'text':metric_dropdown_value
                     },
-                'type':'linear' if log_radio_value == 'Linear' else 'log',
+                    'type':'linear' if log_radio_value == 'Linear' else 'log',
+                    'gridcolor':'#b3b3b3'
                 },
                 'xaxis':{
                     'title':{
                         'text': 'Date'
-                    }
+                    }},
+                'plot_bgcolor':'#333333',
+                'paper_bgcolor':'#333333',
+                'font':{
+                    'color':'white'
                 },
-                }}
+                }
+        }
+
+
+############################################################################################################################################
+############################ Pie Graph + death_info ###########################################################################################
+############################################################################################################################################
+
+### up
+@app.callback(
+    Output('death_info', 'children'),
+    [Input('country_dropdown', 'value')]
+)
+
+def the_death_info(country_dropdown_value):
+    #global death rate
+    global_death = df[df['Case_Type'] == 'Deaths']
+    global_cases = df[df['Case_Type'] == 'Confirmed']
+    global_death_rate = global_death.Difference.sum()/global_cases.Difference.sum()
+
+    country_df = df[df['Country_Region'] == country_dropdown_value]
+    confirmed_df = country_df[country_df['Case_Type'] == 'Confirmed']
+    death_df = country_df[country_df['Case_Type'] == 'Deaths']
+    confirmed = confirmed_df.Difference.sum()
+    deaths = death_df.Difference.sum()
+    country_death_rate = deaths/confirmed
+
+    if global_death_rate < country_death_rate:
+        return [
+            html.Div([
+                html.P('The country of {} is doing worst than the global average death rate of {:.3f}%.' .format(country_dropdown_value, global_death_rate*100))
+            ])
+        ]
+    elif global_death_rate > country_death_rate:
+        return [
+            html.Div([
+                html.P('The country of {} is doing better than the global average death rate of {:.3f}%.' .format(country_dropdown_value, global_death_rate*100))
+            ])
+        ]
+    elif global_death_rate == country_death_rate:
+        return [
+            html.Div([
+                html.P('{} is doing exactly(?!?!?!) the global average death rate of {:.3f}%.' .format(country_dropdown_value, global_death_rate*100))
+            ])
+        ]
+    else:
+        return [
+            html.Div([
+                html.P('Select a country please.')
+            ])
+    ]
+
+
+###outputs the deathrate of selected country as a piechart
+@app.callback(
+    Output('pie_graph_country', 'figure'),
+    [Input('country_dropdown', 'value')],
+)
+
+## death rates
+def the_pie_graph(country_dropdown_value):
+    country_df = df[df['Country_Region'] == country_dropdown_value]
+    confirmed_df = country_df[country_df['Case_Type'] == 'Confirmed']
+    death_df = country_df[country_df['Case_Type'] == 'Deaths']
+    confirmed = confirmed_df.Difference.sum()
+    deaths = death_df.Difference.sum()
+
+    return{
+        'data':([
+            {
+                'values':[confirmed, deaths] , 'type':'pie', 'labels':['Confirmed', 'Deaths'], 'marker' : {
+                    'colors':['lightgreen','red'],
+                    'line':{
+                        'color':'black',
+                        'width':'2'
+            }}}
+        ]),
+        'layout':{
+            'title':{
+                'text':'Death rate in {}' .format(country_dropdown_value)
+        },
+        'paper_bgcolor':'#333333',
+        'font':{
+            'color':'white'
+        }
+        }}
+
+
+
+#####################################################################################################################################
+####################### Scaled Cases ################################################################################################
+#####################################################################################################################################
+
+@app.callback(
+    Output('scaled_cases', 'figure'),
+    [Input('scaled_dropdown', 'value'),
+    Input('scaled_dropdown2', 'value')]
+)
+
+def the_scaled_cases(scaled_dropdown_value, scaled_dropdown_value2):
+    country_df = OWID_df[OWID_df['location']== scaled_dropdown_value]
+    country_df['Scaled Cases'] = country_df['total_cases']/country_df['total_tests']
+
+    country_df2 = OWID_df[OWID_df['location']== scaled_dropdown_value2]
+    country_df2['Scaled Cases'] = country_df2['total_cases']/country_df2['total_tests']
+
+    return {
+        'data':([
+            {'x':country_df.date, 'y':country_df['Scaled Cases'], 'type':'line', 'name':scaled_dropdown_value},
+            {'x':country_df2.date, 'y':country_df2['Scaled Cases'], 'type':'line', 'name':scaled_dropdown_value2}
+        ]),
+        'layout':{
+            'yaxis':{
+                'title':'Scaled Cases',
+                'gridcolor':'#b3b3b3'
+            },
+            'xaxis':{
+                'title':'Date'
+            },
+            'font':{
+                'color':'white'
+            },
+            'plot_bgcolor':'#333333',
+            'paper_bgcolor':'#333333',
+            'title': ('Scaled Cases for this {} vs {}' .format(scaled_dropdown_value, scaled_dropdown_value2))
+        }
+    }
+
 
 #####################################################################################################################################
 ####################### WORLD PAGE ##################################################################################################
@@ -531,12 +697,18 @@ def the_world_graph(metric_dropdown_value, log_radio_value):
                     'type':'linear' if log_radio_value == 'Linear' else 'log',
                     'title':{
                         'text':(metric_dropdown_value)
-                    }
+                    },
+                    'gridcolor':'#b3b3b3'
                 },
                 'xaxis':{
                     'title':{
                         'text':('Date')
                     }
+                },
+                'plot_bgcolor':'#333333',
+                'paper_bgcolor':'#333333',
+                'font':{
+                    'color':'white'
                 }
             }
 
@@ -567,12 +739,18 @@ def the_world_graph(metric_dropdown_value, log_radio_value):
                     'type':'linear' if log_radio_value == 'Linear' else 'log',
                     'title':{
                         'text':(metric_dropdown_value)
-                    }
+                    },
+                    'gridcolor':'#b3b3b3'
                 },
                 'xaxis':{
                     'title':{
                         'text':('Date')
                     }
+                },
+                'plot_bgcolor':'#333333',
+                'paper_bgcolor':'#333333',
+                'font':{
+                    'color':'white'
                 }
             }
         }
@@ -602,12 +780,18 @@ def the_world_graph(metric_dropdown_value, log_radio_value):
                     'type':'linear' if log_radio_value == 'Linear' else 'log',
                     'title':{
                         'text':(metric_dropdown_value)
-                    }
+                    },
+                    'gridcolor':'#b3b3b3'
                 },
                 'xaxis':{
                     'title':{
-                        'text':'Date'
+                        'text':('Date')
                     }
+                },
+                'plot_bgcolor':'#333333',
+                'paper_bgcolor':'#333333',
+                'font':{
+                    'color':'white'
                 }
             }
         }
@@ -637,12 +821,18 @@ def the_world_graph(metric_dropdown_value, log_radio_value):
                     'type':'linear' if log_radio_value == 'Linear' else 'log',
                     'title':{
                         'text':(metric_dropdown_value)
-                    }
+                    },
+                    'gridcolor':'#b3b3b3'
                 },
                 'xaxis':{
                     'title':{
-                        'text':'Date'
+                        'text':('Date')
                     }
+                },
+                'plot_bgcolor':'#333333',
+                'paper_bgcolor':'#333333',
+                'font':{
+                    'color':'white'
                 }
             }
         }
