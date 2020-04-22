@@ -92,12 +92,12 @@ app.layout = html.Div([
     html.Div(
         children = [
             html.H1('Just Another Coronavirus Dashboard',
-                style = {'font-family':'Helvetica narrow, sans-serif', 'fontWeight':'lighter', 'color':'white'})
+                style = {'font-family':'Helvetica narrow, sans-serif', 'fontWeight':'lighter', 'color':'white', 'padding-top':'2px'})
         ]),
     dcc.Tabs(id = 'tabs', value = 'country',
         children = [
-            dcc.Tab(label = 'Global', value = 'global', style = tab_style, selected_style = tab_selected_style),
             dcc.Tab(label = 'By Country', value = 'country', style = tab_style, selected_style = tab_selected_style),
+            dcc.Tab(label = 'Global', value = 'global', style = tab_style, selected_style = tab_selected_style),
         #    dcc.Tab(label = 'Leading Statistics', value = 'leading', style = tab_style, selected_style = tab_selected_style)
         ],style = {'height':'60px'}),
     html.Div(id = 'render_page')
@@ -126,7 +126,7 @@ global_layout = html.Div([
         html.Div([
             html.P('Total Deaths:'),
             html.P(total_deaths),
-        ], style = {'textAlign':'center','box-shadow': '2px 2px 2px lightgray', 'font-size':'25px', 'width':'25%', 'float':'left'}
+        ], style = {'textAlign':'center','box-shadow': '2px 2px 2px lightgray', 'font-size':'25px', 'width':'25%', 'float':'left', 'padding-top':'none'}
         ),
     ],style = {'vertical-align':'top', 'width':'100%', 'color':'white', 'backgroundColor':'#333333'}
         ),
@@ -146,7 +146,7 @@ global_layout = html.Div([
             value = 'Linear',
             style = {'color':'white'}
         ),
-        ], style = {'width':'100%'}),
+        ], style = {'width':'95%','margin':'auto'}),
     html.Div(
         children = [
             dcc.Graph(id = 'world_graph')
@@ -171,8 +171,9 @@ country_layout = html.Div([
     html.Div([
         html.Div([
             html.P('Select a country and the displayed data you want here:',
-            style = {'font-size':'25px', 'color':'white'}
+            style = {'font-size':'25px', 'color':'white', 'width':'95%', 'margin':'auto'}
             ),
+            html.Br(),
             html.Div([
                     dcc.Dropdown(
                         id = 'country_dropdown',
@@ -186,15 +187,15 @@ country_layout = html.Div([
                         value = 'Daily Cases',
                         style = {'width':'35%', 'padding-left':'10%'}
                     ),
-            ],style = {'display':'flex', 'font-size':'20px'}
+            ],style = {'display':'flex', 'font-size':'20px', 'width':'95%', 'margin':'auto'}
             ),
             dcc.RadioItems(
                 id = 'log_radio',
                 options = [{'label':i, 'value':i} for i in ['Linear', 'Log']],
                 value = 'Linear',
-                style = {'color':'white'}
+                style = {'color':'white', 'width':'95%', 'margin':'auto'}
                 ),
-        ], style = {'width':'100%', 'display':'inline-block'}
+        ], style = {'width':'100%', 'display':'inline-block', 'margin':'auto'}
         ),
 
         html.Div([
@@ -218,7 +219,7 @@ country_layout = html.Div([
         html.H2('What is the scaled case?',
             style = {'fontWeight':'bold', 'font-size':'35px', 'color':'white', 'textAlign':'center'}),
         html.P('The scaled case is a simple metric to tell you how a country is doing against the spread of the virus. It acomplishes this by scaling cases by the number of tests. Often times when the media is announcing new cases or deaths, it does not take into account the testing done. By scaling the cases with the number of tests, we can get a more accurate portrayal of how much the virus has spread in each country relative to each other. The same rule applies here as for most other Coronavirus graphs, bigger number = bad!', style = {'color':'white', 'font-size':'25px'})
-    ], style = {'color':'white'}),
+    ], style = {'color':'white', 'width':'95%', 'margin':'auto'}),
     html.Div([
         dcc.Dropdown(
             id = 'scaled_dropdown',
@@ -232,7 +233,7 @@ country_layout = html.Div([
             value = 'United States',
             style = {'width':'35%', 'padding-left':'10%'}
         ),
-    ],style = {'display':'flex', 'width':'100%'}),
+    ],style = {'display':'flex', 'width':'95%', 'margin':'auto'}),
     html.Div([
         dcc.Graph(id = 'scaled_cases'),
     ])
