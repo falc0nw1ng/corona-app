@@ -17,6 +17,7 @@ import pandas as pd
 df = pd.read_csv('https://query.data.world/s/ihom5k3szttx7w4w2wwqronax7k5db')
 df[['Cases','Difference']].fillna(value = 0, inplace = True)
 df.sort_values('Country_Region', inplace = True)
+df.Date = pd.to_datetime(df.Date)
 country_list = df['Country_Region'].unique()
 
 metrics_list = ['Daily Cases', 'Daily Deaths', 'Cumulative Cases', 'Cumulative Deaths']
@@ -29,9 +30,13 @@ death_cases = df[df['Case_Type'] =='Deaths']
 total_deaths = death_cases.Difference.sum()
 
 ### daily deaths and cases
+canada_df = df[df['Country_Region'] == 'Canada']
+#canada_df.dtime = pd.to_datetime(canada_df.Date)
+#canada_df.formatted_date = canada_df.dtime.dt.strftime('%m/%d/%Y')
+#most_recent_date = canada_df.formatted_date.max()
+most_recent_date = canada_df.Date.max()
 
-most_recent_date = df.Date.max()
-recent_df = df[df['Date'] == df.Date.max()]
+recent_df = df[df['Date'] == most_recent_date]
 recent_cases = recent_df[recent_df['Case_Type'] == 'Confirmed']
 recent_deaths = recent_df[recent_df['Case_Type'] == 'Deaths']
 
@@ -103,9 +108,6 @@ app.layout = html.Div([
     html.Div(id = 'render_page')
 ],style = {'width':'80%', 'margin':'auto', 'backgroundColor':'#333333', 'height':'100%'}
 )
-
-
-
 global_layout = html.Div([
     html.Div([
         html.Div([
@@ -260,7 +262,7 @@ leading_layout = html.Div(
 def daily_country_cases_update(country_dropdown_value):
     country_df = df[df['Country_Region']==country_dropdown_value]
     confirmed_df = country_df[country_df['Case_Type'] == 'Confirmed']
-    confirmed_df.Date = pd.to_datetime(confirmed_df.Date)
+#    confirmed_df.Date = pd.to_datetime(confirmed_df.Date)
     grouped_df = confirmed_df.groupby('Date').sum()[['Cases','Difference']]
     sorted_df = grouped_df.sort_values(by = 'Date', ascending = False).Difference
     daily_cases = sorted_df.iloc[0]
@@ -284,7 +286,7 @@ def daily_country_cases_update(country_dropdown_value):
 def daily_country_cases_update(country_dropdown_value):
     country_df = df[df['Country_Region']==country_dropdown_value]
     confirmed_df = country_df[country_df['Case_Type'] == 'Deaths']
-    confirmed_df.Date = pd.to_datetime(confirmed_df.Date)
+#    confirmed_df.Date = pd.to_datetime(confirmed_df.Date)
     grouped_df = confirmed_df.groupby('Date').sum()[['Cases','Difference']]
     sorted_df = grouped_df.sort_values(by = 'Date', ascending = False).Difference
     daily_deaths = sorted_df.iloc[0]
@@ -353,7 +355,7 @@ def the_virus_graph(country_dropdown_value, metric_dropdown_value, log_radio_val
     if metric_dropdown_value == 'Daily Cases':
         country_df = df[df['Country_Region'] == country_dropdown_value]
         confirmed_df = country_df[country_df['Case_Type'] == 'Confirmed']
-        confirmed_df['Date'] = pd.to_datetime(confirmed_df['Date']);
+#        confirmed_df['Date'] = pd.to_datetime(confirmed_df['Date']);
         sorted_df = confirmed_df.sort_values('Date', ascending = True)
         sum_df = sorted_df.groupby('Date').sum()['Difference']
         x = sum_df.index
@@ -398,7 +400,7 @@ def the_virus_graph(country_dropdown_value, metric_dropdown_value, log_radio_val
     elif metric_dropdown_value == 'Cumulative Cases':
         country_df = df[df['Country_Region'] == country_dropdown_value]
         confirmed_df = country_df[country_df['Case_Type'] == 'Confirmed']
-        confirmed_df['Date'] = pd.to_datetime(confirmed_df['Date']);
+    #    confirmed_df['Date'] = pd.to_datetime(confirmed_df['Date']);
         sorted_df = confirmed_df.sort_values('Date', ascending = True)
         sum_df = sorted_df.groupby('Date').sum()['Cases']
         x = sum_df.index
@@ -443,7 +445,7 @@ def the_virus_graph(country_dropdown_value, metric_dropdown_value, log_radio_val
     elif metric_dropdown_value == 'Daily Deaths':
         country_df = df[df['Country_Region'] == country_dropdown_value]
         confirmed_df = country_df[country_df['Case_Type'] == 'Deaths']
-        confirmed_df['Date'] = pd.to_datetime(confirmed_df['Date']);
+    #    confirmed_df['Date'] = pd.to_datetime(confirmed_df['Date']);
         sorted_df = confirmed_df.sort_values('Date', ascending = True)
         sum_df = sorted_df.groupby('Date').sum()['Difference']
         x = sum_df.index
@@ -488,7 +490,7 @@ def the_virus_graph(country_dropdown_value, metric_dropdown_value, log_radio_val
     elif metric_dropdown_value == 'Cumulative Deaths':
         country_df = df[df['Country_Region'] == country_dropdown_value]
         confirmed_df = country_df[country_df['Case_Type'] == 'Deaths']
-        confirmed_df['Date'] = pd.to_datetime(confirmed_df['Date']);
+#        confirmed_df['Date'] = pd.to_datetime(confirmed_df['Date']);
         sorted_df = confirmed_df.sort_values('Date', ascending = True)
         sum_df = sorted_df.groupby('Date').sum()['Cases']
         x = sum_df.index
