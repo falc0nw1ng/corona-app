@@ -5,6 +5,7 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
+from flask import Flask
 
 import numpy as np
 import pandas as pd
@@ -138,9 +139,16 @@ tab_selected_style = {
     'margin': 'auto'
 }
 
-app = dash.Dash(__name__)
+'''app = dash.Dash(__name__)
 app.config.suppress_callback_exceptions = True
 server = app.server #uncomment this for deployment
+'''
+server = Flask(__name__)
+server.secret_key = os.environ.get('secret_key', 'secret')
+app = dash.Dash(name = __name__, server = server)
+app.config.supress_callback_exceptions = True
+
+
 
 app.layout = html.Div([
     html.Div(
@@ -909,8 +917,8 @@ def display_page(tab_value):
     else:
         return country_layout
 
-
+'''
 if __name__ == '__main__':
     app.run_server(debug = True)
-
+'''
 ####
