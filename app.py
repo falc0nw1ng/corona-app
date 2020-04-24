@@ -1,5 +1,6 @@
 import os
 
+import plotly.graph_objects as go
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -22,30 +23,6 @@ country_list = df['Country_Region'].unique()
 
 metrics_list = ['Daily Cases', 'Daily Deaths', 'Cumulative Cases', 'Cumulative Deaths']
 
-### world total number of cases
-confirmed_cases = df[df['Case_Type'] == "Confirmed"]
-total_cases = confirmed_cases.Difference.sum()
-
-death_cases = df[df['Case_Type'] =='Deaths']
-total_deaths = death_cases.Difference.sum()
-
-### daily deaths and cases
-canada_df = df[df['Country_Region'] == 'Canada']
-#canada_df.dtime = pd.to_datetime(canada_df.Date)
-#canada_df.formatted_date = canada_df.dtime.dt.strftime('%m/%d/%Y')
-#most_recent_date = canada_df.formatted_date.max()
-most_recent_date = canada_df.Date.max()
-
-recent_df = df[df['Date'] == most_recent_date]
-recent_cases = recent_df[recent_df['Case_Type'] == 'Confirmed']
-recent_deaths = recent_df[recent_df['Case_Type'] == 'Deaths']
-
-daily_global_cases = recent_cases.Difference.sum()
-daily_global_deaths = recent_deaths.Difference.sum()
-
-
-##maybe do this part as a callback to prevent too much loading later
-
 #### this is the OWID data set which contains some testing data as well
 OWID_df = pd.read_csv("https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/owid-covid-data.csv")
 OWID_df[['total_cases', 'new_cases',
@@ -62,10 +39,81 @@ have_test_data = OWID_df[OWID_df['total_tests_per_thousand']>0]
 second_country_list = have_test_data.sort_values(by = 'location')
 
 
+### loads the data for the data boxes
+confirmed_cases = df[df['Case_Type'] == "Confirmed"]
+total_cases = confirmed_cases.Difference.sum()
+
+death_cases = df[df['Case_Type'] =='Deaths']
+total_deaths = death_cases.Difference.sum()
+
+### daily deaths and cases
+canada_df = df[df['Country_Region'] == 'Canada']
+most_recent_date = canada_df.Date.max()
+
+recent_df = df[df['Date'] == most_recent_date]
+recent_cases = recent_df[recent_df['Case_Type'] == 'Confirmed']
+recent_deaths = recent_df[recent_df['Case_Type'] == 'Deaths']
+
+daily_global_cases = recent_cases.Difference.sum()
+daily_global_deaths = recent_deaths.Difference.sum()
+
+
+#### generate map ####
+coord = confirmed_cases.groupby(['Lat', 'Long']).sum()
+coord = coord.sort_values(by = 'Difference', ascending = False)
+
+limits = [(0,5), (6,100), (101, 1000)]
+colors = ["crimson", "royalblue","lightseagreen"]
+scale = 200
+
+fig = go.Figure()
+def create_map():
+    for i in range(len(limits)):
+        lim = limits[i]
+        df_sub = coord[lim[0]:lim[1]]
+        fig.add_trace(go.Scattergeo(
+            locationmode = 'ISO-3',
+            lat = df_sub.index.get_level_values(level = 0),
+            lon = df_sub.index.get_level_values(level = 1),
+            text = df_sub.Difference,
+            marker = dict(
+                size = df_sub.Difference/scale,
+                color = colors[i],
+                line_color='rgb(40,40,40)',
+                line_width=1,
+                sizemode = 'area'
+            ),
+            name = '{0} - {1}'.format(lim[0], lim[1])
+                )),
+
+
+    fig.update_layout(
+        title_text = "Largest 1000 Coronavirus Epicenters Around the World",
+        title_x = 0.5,
+        showlegend = True,
+        plot_bgcolor = '#333333',
+        paper_bgcolor = '#333333',
+        xaxis = dict(fixedrange = True),
+        yaxis = dict(fixedrange = True),
+        font = dict(
+            color = 'white',
+
+        ),
+        geo = go.layout.Geo(
+            resolution = 50,
+            scope = 'world',
+            showframe = False,
+            showcoastlines = True,
+            landcolor = 'rgb(217,217,217)',
+            showocean = True,
+            oceancolor = '#333333',
+            countrycolor = "white" ,
+            coastlinecolor = "white",
+    ),
+    )
 ########################################################################################################################################
 ################## DASH PORTION ########################################################################################################
 ########################################################################################################################################
-
 
 tab_style = {
     'borderBottom': '1px solid white',
@@ -97,17 +145,18 @@ app.layout = html.Div([
     html.Div(
         children = [
             html.H1('Just Another Coronavirus Dashboard',
-                style = {'font-family':'Helvetica narrow, sans-serif', 'fontWeight':'lighter', 'color':'white', 'padding-top':'2px'})
+                style = {'font-family':'Helvetica narrow, sans-serif', 'fontWeight':'lighter', 'color':'white', 'margin':'auto', 'padding-top':'5px', 'padding-left':'5px'})
         ]),
     dcc.Tabs(id = 'tabs', value = 'country',
         children = [
             dcc.Tab(label = 'By Country', value = 'country', style = tab_style, selected_style = tab_selected_style),
-            dcc.Tab(label = 'Global', value = 'global', style = tab_style, selected_style = tab_selected_style),
+            dcc.Tab(label = 'Around the World', value = 'global', style = tab_style, selected_style = tab_selected_style),
         #    dcc.Tab(label = 'Leading Statistics', value = 'leading', style = tab_style, selected_style = tab_selected_style)
         ],style = {'height':'60px'}),
     html.Div(id = 'render_page')
 ],style = {'width':'80%', 'margin':'auto', 'backgroundColor':'#333333', 'height':'100%'}
 )
+
 global_layout = html.Div([
     html.Div([
         html.Div([
@@ -133,7 +182,11 @@ global_layout = html.Div([
     ],style = {'vertical-align':'top', 'width':'100%', 'color':'white', 'backgroundColor':'#333333'}
         ),
     html.Div([
-        html.P('Select a desired metric',
+        dcc.Graph(figure = fig, style = {'height':800})
+        ], style = {'width':'100%', 'float':'left' }
+        ),
+    html.Div([
+        html.P('Select a metric',
         style = {'color':'white', 'font-size':'20px'}
         ),
         dcc.Dropdown(
@@ -149,12 +202,11 @@ global_layout = html.Div([
             style = {'color':'white'}
         ),
         ], style = {'width':'95%','margin':'auto'}),
-    html.Div(
-        children = [
-            dcc.Graph(id = 'world_graph')
+    html.Div([
+        dcc.Graph(id = 'world_graph')
         ],
         style = {'width':'100%'}
-        )
+        ),
     ],style = {'backgroundColor':'#333333'})
 
 ####### country Layout
@@ -364,11 +416,11 @@ def the_virus_graph(country_dropdown_value, metric_dropdown_value, log_radio_val
 
         return {
                 'data':([
-                    {'x':x, 'y':y, 'type':'bar', 'name':country_dropdown_value, 'mode':'lines+markers', 'markers':{
+                    {'x':x, 'y':y, 'type':'bar', 'name':'Daily Cases for {}'.format(country_dropdown_value), 'mode':'lines+markers', 'markers':{
                     }, 'marker':{
                             'color':'orange'
                     }},
-                    {'x':x, 'y': z, 'type':'line', 'name': '5 day moving average', 'marker':{
+                    {'x':x, 'y': z, 'type':'line', 'name': 'Moving Average (window = 5 Days)', 'marker':{
                         'color':'red'
                     }}
                 ]),
@@ -410,11 +462,11 @@ def the_virus_graph(country_dropdown_value, metric_dropdown_value, log_radio_val
 
         return {
                 'data':([
-                    {'x':x, 'y':y, 'type':'bar', 'name':country_dropdown_value, 'mode':'lines+markers','markers':{
+                    {'x':x, 'y':y, 'type':'bar', 'name':'Cumulative Cases for {}' .format(country_dropdown_value), 'mode':'lines+markers','markers':{
                     }, 'marker':{
                             'color':'orange'
                     }},
-                    {'x':x, 'y': z, 'type':'line', 'name': '5 day moving average', 'marker':{
+                    {'x':x, 'y': z, 'type':'line', 'name': 'Moving Average (window = 5 Days)', 'marker':{
                         'color':'red'
                     }}
 
@@ -455,11 +507,11 @@ def the_virus_graph(country_dropdown_value, metric_dropdown_value, log_radio_val
 
         return {
                 'data':([
-                    {'x':x, 'y':y, 'type':'bar', 'name':country_dropdown_value, 'mode':'lines+markers','markers':{
+                    {'x':x, 'y':y, 'type':'bar', 'name':'Daily Deaths for {}' .format(country_dropdown_value), 'mode':'lines+markers','markers':{
                     }, 'marker':{
                             'color':'orange'
                     }},
-                    {'x':x, 'y': z, 'type':'line', 'name': '5 day moving average', 'marker':{
+                    {'x':x, 'y': z, 'type':'line', 'name': 'Moving Average (window = 5 Days)', 'marker':{
                         'color':'red'
                     }}
 
@@ -500,11 +552,11 @@ def the_virus_graph(country_dropdown_value, metric_dropdown_value, log_radio_val
 
         return {
                 'data':([
-                    {'x':x, 'y':y, 'type':'bar', 'name':country_dropdown_value, 'mode':'lines+markers','markers':{
+                    {'x':x, 'y':y, 'type':'bar', 'name':'Cumulative Deaths for {}' .format(country_dropdown_value), 'mode':'lines+markers','markers':{
                     }, 'marker':{
                             'color':'orange'
                     }},
-                    {'x':x, 'y': z, 'type':'line', 'name': '5 day moving average', 'marker':{
+                    {'x':x, 'y': z, 'type':'line', 'name': 'Moving Average (window = 5 Days)', 'marker':{
                         'color':'red'
                     }}
                 ]),
@@ -688,7 +740,7 @@ def the_world_graph(metric_dropdown_value, log_radio_value):
                 {'x': x, 'y': y, 'type':'bar', 'name': metric_dropdown_value,'marker':{
                     'color':'orange'
                 }},
-                {'x':x, 'y':y.rolling(window = 5).mean(),'name':'5 day moving average', 'type':'line', 'marker':{
+                {'x':x, 'y':y.rolling(window = 5).mean(),'name':'Moving Average (window = 5 Days)', 'type':'line', 'marker':{
                     'color':'red'
                 }}
             ]),
@@ -730,7 +782,7 @@ def the_world_graph(metric_dropdown_value, log_radio_value):
                 {'x': x, 'y': y, 'type':'bar', 'name': metric_dropdown_value, 'marker':{
                     'color':'lightgreen'
                 }},
-                {'x':x, 'y':y.rolling(window = 5).mean(),'name':'5 day moving average', 'type':'line', 'marker':{
+                {'x':x, 'y':y.rolling(window = 5).mean(),'name':'Moving Average (window = 5 Days)', 'type':'line', 'marker':{
                     'color':'red'
                 }}
             ]),
@@ -771,7 +823,7 @@ def the_world_graph(metric_dropdown_value, log_radio_value):
                 {'x': x, 'y': y, 'type':'bar', 'name': metric_dropdown_value, 'marker':{
                     'color':'mediumpurple'
                 }},
-                {'x':x, 'y':y.rolling(window = 5).mean(),'name':'5 day moving average', 'type':'line', 'marker':{
+                {'x':x, 'y':y.rolling(window = 5).mean(),'name':'Moving Average (window = 5 Days)', 'type':'line', 'marker':{
                     'color':'red'
                 }}
             ]),
@@ -812,7 +864,7 @@ def the_world_graph(metric_dropdown_value, log_radio_value):
                 {'x': x, 'y': y, 'type':'bar', 'name': metric_dropdown_value,'mode':'lines+markers', 'marker':{
                     'color':'slategray'
                 }},
-                {'x':x, 'y':y.rolling(window = 5).mean(),'name':'5 day moving average', 'marker':{
+                {'x':x, 'y':y.rolling(window = 5).mean(),'name':'Moving Average (window = 5 Days)', 'marker':{
                     'color':'red'
                 }}
             ]),
@@ -840,15 +892,6 @@ def the_world_graph(metric_dropdown_value, log_radio_value):
             }
         }
 
-####################################################################################################################################################
-############################ Leading ###########################################################################################################
-####################################################################################################################################################
-
-
-
-
-
-
 
 
 ####################################################################################################################################################
@@ -861,13 +904,10 @@ def the_world_graph(metric_dropdown_value, log_radio_value):
 )
 def display_page(tab_value):
     if tab_value == 'global':
+        create_map()
         return global_layout
-#    elif tab_value == 'leading':
-#        return leading_layout
     else:
         return country_layout
-
-
 
 
 if __name__ == '__main__':
