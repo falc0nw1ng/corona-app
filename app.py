@@ -89,7 +89,7 @@ def create_map():
 
 
     fig.update_layout(
-        title_text = "Largest 1000 Coronavirus Epicenters Around the World",
+        title_text = "Largest 1000 Coronavirus Epicenters Around the World (note: top right handside of graph to reset)",
         title_x = 0.5,
         showlegend = True,
         plot_bgcolor = '#333333',
@@ -118,7 +118,10 @@ create_map()
 ########################################################################################################################################
 
 tab_style = {
-    'borderBottom': '1px solid white',
+    'border-top': '1px solid white',
+    'border-bottom': '1px solid white',
+    'border-right': '1px solid white',
+    'border-left': '1px solid white',
     'padding': '6px',
     'font-size': '20px',
     'font-family':'bold',
@@ -129,8 +132,9 @@ tab_style = {
 }
 
 tab_selected_style = {
-    'borderTop': '1px solid #d6d6d6',
-    'borderBottom': '1px solid #d6d6d6',
+    'borderTop': '1px solid white',
+    'borderBottom': '1px solid white',
+    'border':'1px solid white',
     'backgroundColor': '#cf082f',
     'color': 'white',
     'padding': '6px',
@@ -156,7 +160,7 @@ app.layout = html.Div([
             dcc.Tab(label = 'By Country', value = 'country', style = tab_style, selected_style = tab_selected_style),
             dcc.Tab(label = 'Around the World', value = 'global', style = tab_style, selected_style = tab_selected_style),
         #    dcc.Tab(label = 'Leading Statistics', value = 'leading', style = tab_style, selected_style = tab_selected_style)
-        ],style = {'height':'60px'}),
+        ],style = {'height': '50px'}),
     html.Div(id = 'render_page')
 ],style = {'width':'80%', 'margin':'auto', 'backgroundColor':'#333333', 'height':'100%'}
 )
@@ -294,17 +298,16 @@ country_layout = html.Div([
     ],style = {'display':'flex', 'width':'95%', 'margin':'auto'}),
     html.Div([
         dcc.Graph(id = 'scaled_cases'),
-    ])
+    ]),
+    html.Div([
+        html.P(['Data source from Johns Hopkins and OWID. Further details about the data source and information about me can be found ',
+            html.A('here',href = 'https://therealmaplejordan.com/', style = {'color':'orange'})],
+                style = {'color':'white'}),
 ], style = {'vertical-align':'top', 'backgroundColor':'#333333'}
 )
+], style = {'vertical-align':'top', 'backgroundColor':'#333333'})
 
-####### Leading Layout
-'''
-leading_layout = html.Div(
-    children = [
-    ]
-)
-'''
+
 
 ##### update case and deaths for country
 #### this is the four boxes at the top of the country tab
