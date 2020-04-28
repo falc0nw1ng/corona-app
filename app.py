@@ -60,7 +60,8 @@ daily_global_deaths = recent_deaths.Difference.sum()
 
 
 #### generate map ####
-coord = confirmed_cases.groupby(['Lat', 'Long']).sum()
+confirmed_df = confirmed_cases[['Difference','Lat', 'Long']]
+coord = confirmed_df.groupby(['Lat', 'Long']).sum()
 coord = coord.sort_values(by = 'Difference', ascending = False)
 
 limits = [(0,5), (6,100), (101, 1000)]
