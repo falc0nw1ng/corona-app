@@ -300,11 +300,11 @@ country_layout = html.Div([
     html.Div([
         dcc.Graph(id = 'scaled_cases'),
     ]),
-#    html.Div([
-#        html.P(['Data source from Johns Hopkins and OWID. Further details about the data source and information about me can be found ',
-#            html.A('here',href = 'https://therealmaplejordan.com/', style = {'color':'orange'})],
-#                style = {'color':'white'}),
-#], style = {'vertical-align':'top', 'backgroundColor':'#333333'}
+    html.Div([
+        html.P(['Data source from Johns Hopkins and OWID. Further details about the data source and information about me can be found ',
+            html.A('here',href = 'https://therealmaplejordan.com/', style = {'color':'orange'})],
+                style = {'color':'white'}),
+], style = {'vertical-align':'top', 'backgroundColor':'#333333'}
 )
 ], style = {'vertical-align':'top', 'backgroundColor':'#333333'})
 
