@@ -1,5 +1,4 @@
 import os
-
 import plotly.graph_objects as go
 import dash
 import dash_core_components as dcc
@@ -69,51 +68,8 @@ colors = ["crimson", "royalblue","lightseagreen"]
 scale = 200
 
 fig = go.Figure()
-def create_map():
-    for i in range(len(limits)):
-        lim = limits[i]
-        df_sub = coord[lim[0]:lim[1]]
-        fig.add_trace(go.Scattergeo(
-            locationmode = 'ISO-3',
-            lat = df_sub.index.get_level_values(level = 0),
-            lon = df_sub.index.get_level_values(level = 1),
-            text = df_sub.Difference,
-            marker = dict(
-                size = df_sub.Difference/scale,
-                color = colors[i],
-                line_color='rgb(40,40,40)',
-                line_width=1,
-                sizemode = 'area'
-            ),
-            name = '{0} - {1}'.format(lim[0], lim[1])
-                )),
 
 
-    fig.update_layout(
-        title_text = "Largest 1000 Coronavirus Epicenters Around the World (note: top right handside of graph to reset)",
-        title_x = 0.5,
-        showlegend = True,
-        plot_bgcolor = '#333333',
-        paper_bgcolor = '#333333',
-        xaxis = dict(fixedrange = True),
-        yaxis = dict(fixedrange = True),
-        font = dict(
-            color = 'white',
-
-        ),
-        geo = go.layout.Geo(
-            resolution = 50,
-            scope = 'world',
-            showframe = False,
-            showcoastlines = True,
-            landcolor = 'rgb(217,217,217)',
-            showocean = True,
-            oceancolor = '#333333',
-            countrycolor = "white" ,
-            coastlinecolor = "white",
-    ),
-    )
-create_map()
 ########################################################################################################################################
 ################## DASH PORTION ########################################################################################################
 ########################################################################################################################################
@@ -912,6 +868,46 @@ def the_world_graph(metric_dropdown_value, log_radio_value):
 )
 def display_page(tab_value):
     if tab_value == 'global':
+        for i in range(len(limits)):
+            lim = limits[i]
+            df_sub = coord[lim[0]:lim[1]]
+            fig.add_trace(go.Scattergeo(
+                locationmode = 'ISO-3',
+                lat = df_sub.index.get_level_values(level = 0),
+                lon = df_sub.index.get_level_values(level = 1),
+                text = df_sub.Difference,
+                marker = dict(
+                    size = df_sub.Difference/scale,
+                    color = colors[i],
+                    line_color='rgb(40,40,40)',
+                    line_width=1,
+                    sizemode = 'area'
+                ),
+                name = '{0} - {1}'.format(lim[0], lim[1])
+                    )),
+        fig.update_layout(
+            title_text = "Largest 1000 Coronavirus Epicenters Around the World (note: top right handside of graph to reset)",
+            title_x = 0.5,
+            showlegend = True,
+            plot_bgcolor = '#333333',
+            paper_bgcolor = '#333333',
+            xaxis = dict(fixedrange = True),
+            yaxis = dict(fixedrange = True),
+            font = dict(
+                color = 'white',
+            ),
+            geo = go.layout.Geo(
+                resolution = 50,
+                scope = 'world',
+                showframe = False,
+                showcoastlines = True,
+                landcolor = 'rgb(217,217,217)',
+                showocean = True,
+                oceancolor = '#333333',
+                countrycolor = "white" ,
+                coastlinecolor = "white",
+        ),
+        )
         return global_layout
     else:
         return country_layout
