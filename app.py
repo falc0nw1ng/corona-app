@@ -69,6 +69,47 @@ scale = 200
 
 fig = go.Figure()
 
+def create_map():
+    for i in range(len(limits)):
+        lim = limits[i]
+        df_sub = coord[lim[0]:lim[1]]
+        fig.add_trace(go.Scattergeo(
+            locationmode = 'ISO-3',
+            lat = df_sub.index.get_level_values(level = 0),
+            lon = df_sub.index.get_level_values(level = 1),
+            text = df_sub.Difference,
+            marker = dict(
+                size = df_sub.Difference/scale,
+                color = colors[i],
+                line_color='rgb(40,40,40)',
+                line_width=1,
+                sizemode = 'area'
+            ),
+            name = '{0} - {1}'.format(lim[0], lim[1])
+                )),
+    fig.update_layout(
+        title_text = "Largest 1000 Coronavirus Epicenters Around the World (note: top right handside of graph to reset)",
+        title_x = 0.5,
+        showlegend = True,
+        plot_bgcolor = '#333333',
+        paper_bgcolor = '#333333',
+        xaxis = dict(fixedrange = True),
+        yaxis = dict(fixedrange = True),
+        font = dict(
+            color = 'white',
+        ),
+        geo = go.layout.Geo(
+            resolution = 50,
+            scope = 'world',
+            showframe = False,
+            showcoastlines = True,
+            landcolor = 'rgb(217,217,217)',
+            showocean = True,
+            oceancolor = '#333333',
+            countrycolor = "white" ,
+            coastlinecolor = "white",
+    ),
+    )
 
 ########################################################################################################################################
 ################## DASH PORTION ########################################################################################################
@@ -116,7 +157,6 @@ app.layout = html.Div([
         children = [
             dcc.Tab(label = 'By Country', value = 'country', style = tab_style, selected_style = tab_selected_style),
             dcc.Tab(label = 'Around the World', value = 'global', style = tab_style, selected_style = tab_selected_style),
-        #    dcc.Tab(label = 'Leading Statistics', value = 'leading', style = tab_style, selected_style = tab_selected_style)
         ],style = {'height': '50px'}),
     html.Div(id = 'render_page')
 ],style = {'width':'80%', 'margin':'auto', 'backgroundColor':'#333333', 'height':'100%'}
@@ -147,6 +187,7 @@ global_layout = html.Div([
     ],style = {'vertical-align':'top', 'width':'100%', 'color':'white', 'backgroundColor':'#333333'}
         ),
     html.Div([
+        create_map(),
         dcc.Graph(figure = fig, style = {'height':800})
         ], style = {'width':'100%', 'float':'left' }
         ),
@@ -857,7 +898,6 @@ def the_world_graph(metric_dropdown_value, log_radio_value):
         }
 
 
-
 ####################################################################################################################################################
 ############################ Render tabs ###########################################################################################################
 ####################################################################################################################################################
@@ -868,51 +908,9 @@ def the_world_graph(metric_dropdown_value, log_radio_value):
 )
 def display_page(tab_value):
     if tab_value == 'global':
-        for i in range(len(limits)):
-            lim = limits[i]
-            df_sub = coord[lim[0]:lim[1]]
-            fig.add_trace(go.Scattergeo(
-                locationmode = 'ISO-3',
-                lat = df_sub.index.get_level_values(level = 0),
-                lon = df_sub.index.get_level_values(level = 1),
-                text = df_sub.Difference,
-                marker = dict(
-                    size = df_sub.Difference/scale,
-                    color = colors[i],
-                    line_color='rgb(40,40,40)',
-                    line_width=1,
-                    sizemode = 'area'
-                ),
-                name = '{0} - {1}'.format(lim[0], lim[1])
-                    )),
-        fig.update_layout(
-            title_text = "Largest 1000 Coronavirus Epicenters Around the World (note: top right handside of graph to reset)",
-            title_x = 0.5,
-            showlegend = True,
-            plot_bgcolor = '#333333',
-            paper_bgcolor = '#333333',
-            xaxis = dict(fixedrange = True),
-            yaxis = dict(fixedrange = True),
-            font = dict(
-                color = 'white',
-            ),
-            geo = go.layout.Geo(
-                resolution = 50,
-                scope = 'world',
-                showframe = False,
-                showcoastlines = True,
-                landcolor = 'rgb(217,217,217)',
-                showocean = True,
-                oceancolor = '#333333',
-                countrycolor = "white" ,
-                coastlinecolor = "white",
-        ),
-        )
         return global_layout
     else:
         return country_layout
-
-
 
 if __name__ == '__main__':
     app.run_server(debug = True)
