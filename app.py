@@ -443,7 +443,16 @@ def the_virus_graph(country_dropdown_value, metric_dropdown_value, log_radio_val
                 'xaxis':{
                     'title':{
                         'text': 'Date'
-                    }},
+                    },
+                    'rangeselector':{
+                        'buttons':{
+                            'step':'all'
+                        }
+                    },
+                    'rangeslider':{
+                        'visibility':True
+                    },
+                    'type':'date'},
                 'plot_bgcolor':'#333333',
                 'paper_bgcolor':'#333333',
                 'font':{
@@ -490,7 +499,16 @@ def the_virus_graph(country_dropdown_value, metric_dropdown_value, log_radio_val
                 'xaxis':{
                     'title':{
                         'text': 'Date'
-                    }},
+                    },
+                    'rangeselector':{
+                        'buttons':{
+                            'step':'all'
+                        }
+                    },
+                    'rangeslider':{
+                        'visibility':True
+                    },
+                    'type':'date'},
                 'plot_bgcolor':'#333333',
                 'paper_bgcolor':'#333333',
                 'font':{
@@ -535,7 +553,16 @@ def the_virus_graph(country_dropdown_value, metric_dropdown_value, log_radio_val
                 'xaxis':{
                     'title':{
                         'text': 'Date'
-                    }},
+                    },
+                    'rangeselector':{
+                        'buttons':{
+                            'step':'all'
+                        }
+                    },
+                    'rangeslider':{
+                        'visibility':True
+                    },
+                    'type':'date'},
                 'plot_bgcolor':'#333333',
                 'paper_bgcolor':'#333333',
                 'font':{
@@ -579,7 +606,16 @@ def the_virus_graph(country_dropdown_value, metric_dropdown_value, log_radio_val
                 'xaxis':{
                     'title':{
                         'text': 'Date'
-                    }},
+                    },
+                    'rangeselector':{
+                        'buttons':{
+                            'step':'all'
+                        }
+                    },
+                    'rangeslider':{
+                        'visibility':True
+                    },
+                    'type':'date'},
                 'plot_bgcolor':'#333333',
                 'paper_bgcolor':'#333333',
                 'font':{
@@ -715,7 +751,7 @@ def the_scaled_cases(scaled_dropdown_value, scaled_dropdown_value2):
 
 
 #####################################################################################################################################
-####################### WORLD PAGE ##################################################################################################
+####################### GLOBAL PAGE ##################################################################################################
 #####################################################################################################################################
 
 ####
@@ -763,7 +799,16 @@ def the_world_graph(metric_dropdown_value, log_radio_value):
                 'xaxis':{
                     'title':{
                         'text':('Date')
-                    }
+                    },
+                    'rangeselector':{
+                        'buttons':{
+                            'step':'all'
+                        }
+                    },
+                    'rangeslider':{
+                        'visibility':True
+                    },
+                    'type':'date'
                 },
                 'plot_bgcolor':'#333333',
                 'paper_bgcolor':'#333333',
@@ -805,7 +850,16 @@ def the_world_graph(metric_dropdown_value, log_radio_value):
                 'xaxis':{
                     'title':{
                         'text':('Date')
-                    }
+                    },
+                    'rangeselector':{
+                        'buttons':{
+                            'step':'all'
+                        }
+                    },
+                    'rangeslider':{
+                        'visibility':True
+                    },
+                    'type':'date'
                 },
                 'plot_bgcolor':'#333333',
                 'paper_bgcolor':'#333333',
@@ -846,7 +900,16 @@ def the_world_graph(metric_dropdown_value, log_radio_value):
                 'xaxis':{
                     'title':{
                         'text':('Date')
-                    }
+                    },
+                    'rangeselector':{
+                        'buttons':{
+                            'step':'all'
+                        }
+                    },
+                    'rangeslider':{
+                        'visibility':True
+                    },
+                    'type':'date'
                 },
                 'plot_bgcolor':'#333333',
                 'paper_bgcolor':'#333333',
@@ -887,7 +950,16 @@ def the_world_graph(metric_dropdown_value, log_radio_value):
                 'xaxis':{
                     'title':{
                         'text':('Date')
-                    }
+                    },
+                    'rangeselector':{
+                        'buttons':{
+                            'step':'all'
+                        }
+                    },
+                    'rangeslider':{
+                        'visibility':True
+                    },
+                    'type':'date'
                 },
                 'plot_bgcolor':'#333333',
                 'paper_bgcolor':'#333333',
