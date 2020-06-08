@@ -412,7 +412,6 @@ def the_virus_graph(country_dropdown_value, metric_dropdown_value, log_radio_val
     if metric_dropdown_value == 'Daily Cases':
         country_df = df[df['Country_Region'] == country_dropdown_value]
         confirmed_df = country_df[country_df['Case_Type'] == 'Confirmed']
-#        confirmed_df['Date'] = pd.to_datetime(confirmed_df['Date']);
         sorted_df = confirmed_df.sort_values('Date', ascending = True)
         sum_df = sorted_df.groupby('Date').sum()['Difference']
         x = sum_df.index
@@ -423,7 +422,7 @@ def the_virus_graph(country_dropdown_value, metric_dropdown_value, log_radio_val
                 'data':([
                     {'x':x, 'y':y, 'type':'bar', 'name':'Daily Cases for {}'.format(country_dropdown_value), 'mode':'lines+markers', 'markers':{
                     }, 'marker':{
-                            'color':'orange'
+                            'color':'orange',
                     }},
                     {'x':x, 'y': z, 'type':'line', 'name': 'Moving Average (window = 5 Days)', 'marker':{
                         'color':'red'
@@ -651,7 +650,7 @@ def the_death_info(country_dropdown_value):
     if global_death_rate < country_death_rate:
         return [
             html.Div([
-                html.P('The country of {} is doing worst than the global average death rate of {:.3f}%.' .format(country_dropdown_value, global_death_rate*100))
+                html.P('The country of {} is doing worse than the global average death rate of {:.3f}%.' .format(country_dropdown_value, global_death_rate*100))
             ])
         ]
     elif global_death_rate > country_death_rate:
