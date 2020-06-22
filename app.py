@@ -82,7 +82,7 @@ app.layout = html.Div([
             html.H1('Just Another Coronavirus Dashboard',
                 style = {'font-family':'Helvetica narrow, sans-serif', 'fontWeight':'lighter', 'color':'white', 'margin':'auto', 'padding-top':'5px', 'padding-left':'5px'})
         ]),
-    dcc.Tabs(id = 'tabs', value = 'global',
+    dcc.Tabs(id = 'tabs', value = 'country',
         children = [
             dcc.Tab(label = 'By Country', value = 'country', style = tab_style, selected_style = tab_selected_style),
             dcc.Tab(label = 'Around the World', value = 'global', style = tab_style, selected_style = tab_selected_style),
@@ -398,7 +398,7 @@ def death_rate(country_dropdown):
     global_deaths = df.new_deaths.sum()
     global_death_rate = (global_deaths/global_cases).round(3)
 
-    if global_death_rate > country_death_rate:
+    if global_death_rate < country_death_rate:
         return [
             html.Div([
                 html.P("The country of {} is doing worst than the global average death rate of {}%" .format(country_dropdown, global_death_rate*100))
@@ -410,7 +410,7 @@ def death_rate(country_dropdown):
                 html.P("The country of {} has the same death rate, as the global average of {}%" .format(country_dropdown, global_death_rate*100))
             ])
         ]
-    elif global_death_rate < country_death_rate:
+    elif global_death_rate > country_death_rate:
         return [
             html.Div([
                 html.P("The country of {} is doing better than the global average death rate of {}%" .format(country_dropdown, global_death_rate*100))
