@@ -14,11 +14,21 @@ df = pd.read_csv("https://raw.githubusercontent.com/owid/covid-19-data/master/pu
 country_list = df.location.unique()
 
 no_world = df.query("location != 'World'")
+no_world = no_world.query("location != 'International'")
+no_world = no_world.query("location !='Hong Kong'")
+no_world = no_world.query("location != 'Spain'")
 no_world.fillna(0, inplace = True)
 most_recent_date = no_world.date.iloc[-1]
 
-global_map_metric = ['One Week Trend: Cases', 'One Week Trend: Deaths', 'Total Cases', 'Total Deaths']
+def one_week_trends():
+    sorted_df = no_world.sort_values(by = 'date', ascending = True)
+    last_week = no_world[(no_world['date'] >= no_world.date.iloc[-7])]
+    grouped_week = last_week.groupby('location').sum()
+    return grouped_week
 
+x =one_week_trends()
+
+global_map_metric = ['One Week Trend: Cases', 'One Week Trend: Deaths', 'Total Cases', 'Total Deaths']
 metrics_dict = {
     "Daily Cases":'new_cases',
     "Daily Deaths": "new_deaths",
@@ -179,7 +189,7 @@ global_layout = html.Div([
             dcc.RadioItems(
                 id = "radio_map",
                 options = [{'label':i, 'value':i} for i in global_map_metric],
-                value = "One Week Trend: Cases",
+                value = 'One Week Trend: Cases',
                 style = {'color':'white'}
             ),
             style = {'margin-right':'20px'}
@@ -224,9 +234,8 @@ global_layout = html.Div([
 )
 
 def daily_country_cases(country_dropdown):
-    country = df[df['location'] == country_dropdown]
-    daily_cases = country[country['date'] == most_recent_date]['new_cases']
-
+    country = no_world[no_world['location'] == country_dropdown]
+    daily_cases = country.new_cases.iloc[-1]
     return [
         html.Div([
             html.P('Daily cases in {}:' .format(country_dropdown),
@@ -245,15 +254,14 @@ def daily_country_cases(country_dropdown):
 )
 
 def daily_country_deaths(country_dropdown):
-    country = df[df['location'] == country_dropdown]
-    daily_cases = country[country['date'] == most_recent_date]['new_deaths']
-
+    country = no_world[no_world['location'] == country_dropdown]
+    daily_deaths = country.new_deaths.iloc[-1]
     return [
         html.Div([
             html.P('Daily death in {}:' .format(country_dropdown),
                 style = {'font-size':'25px'}
                 ),
-            html.P(daily_cases,
+            html.P(daily_deaths,
                 style = {'font-size':'25px'}
                 )
         ])
@@ -266,15 +274,14 @@ def daily_country_deaths(country_dropdown):
 )
 
 def total_country_cases(country_dropdown):
-    country = df[df['location'] == country_dropdown]
-    daily_cases = country[country['date'] == most_recent_date]['total_cases']
-
+    country = no_world[no_world['location'] == country_dropdown]
+    total_cases = country.total_cases.iloc[-1]
     return [
         html.Div([
             html.P('Total cases in {}:' .format(country_dropdown),
                 style = {'font-size':'25px'}
                 ),
-            html.P(daily_cases,
+            html.P(total_cases,
                 style = {'font-size':'25px'}
                 )
         ])
@@ -287,15 +294,14 @@ def total_country_cases(country_dropdown):
 )
 
 def total_country_deaths(country_dropdown):
-    country = df[df['location'] == country_dropdown]
-    daily_cases = country[country['date'] == most_recent_date]['total_deaths']
-
+    country = no_world[no_world['location'] == country_dropdown]
+    total_deaths = country.total_deaths.iloc[-1]
     return [
         html.Div([
             html.P('Total deaths in {}:' .format(country_dropdown),
                 style = {'font-size':'25px'}
                 ),
-            html.P(daily_cases,
+            html.P(total_deaths,
                 style = {'font-size':'25px'})
         ])
     ]
@@ -309,7 +315,7 @@ def total_country_deaths(country_dropdown):
 )
 
 def bar_graph(country_dropdown, metric_dropdown, log_radio):
-    country = df[df['location'] == country_dropdown]
+    country = no_world[no_world['location'] == country_dropdown]
     return {
         'data':([
             {'x':country.date, 'y':country[metric_dropdown], 'type':'bar', 'name':'Daily Cases for {}'.format(country_dropdown), 'mode':'lines+markers', 'markers':{
@@ -360,7 +366,7 @@ def bar_graph(country_dropdown, metric_dropdown, log_radio):
 )
 
 def pie_graph(country_dropdown):
-    country = df[df['location'] == country_dropdown]
+    country = no_world[no_world['location'] == country_dropdown]
     return{
         'data':([
             {
@@ -389,16 +395,16 @@ def pie_graph(country_dropdown):
 )
 
 def death_rate(country_dropdown):
-    country = df[df['location'] == country_dropdown]
+    country = no_world[no_world['location'] == country_dropdown]
     dead = country.total_deaths.iloc[-1]
     cases = country.total_cases.iloc[-1]
     country_death_rate = dead/cases
 
-    global_cases = df.new_cases.sum()
-    global_deaths = df.new_deaths.sum()
+    global_cases = no_world.new_cases.sum()
+    global_deaths = no_world.new_deaths.sum()
     global_death_rate = (global_deaths/global_cases).round(3)
 
-    if global_death_rate < country_death_rate:
+    if global_death_rate > country_death_rate:
         return [
             html.Div([
                 html.P("The country of {} is doing worst than the global average death rate of {}%" .format(country_dropdown, global_death_rate*100))
@@ -410,7 +416,7 @@ def death_rate(country_dropdown):
                 html.P("The country of {} has the same death rate, as the global average of {}%" .format(country_dropdown, global_death_rate*100))
             ])
         ]
-    elif global_death_rate > country_death_rate:
+    elif global_death_rate < country_death_rate:
         return [
             html.Div([
                 html.P("The country of {} is doing better than the global average death rate of {}%" .format(country_dropdown, global_death_rate*100))
@@ -423,7 +429,7 @@ def death_rate(country_dropdown):
             ])
         ]
 
-### World Page
+############################ World Page ##################
 ############################ global bar graph  ####################################
 
 @app.callback(
@@ -484,30 +490,21 @@ def global_bar_graph(metric_dropdown2, log_radio2):
 
 ### working prototype
 def create_map(column_name):
-    limits = [(0,5), (6,40), (41, 208)]
-    colors = ["crimson", "royalblue","lightseagreen"]
-    scale = 250
-
-    last_week = no_world[(no_world['date'] <=no_world.date.iloc[-1]) & (no_world['date'] > no_world.date.iloc[-8])][['new_cases', 'new_deaths', 'location']]
-    last_week_data = last_week.groupby(by = "location").sum()
-    totals = no_world[no_world.date == most_recent_date][['total_cases', 'total_deaths', 'location']]
-    totals.index = totals.location
-    global_map_metric = ['One Week Trend: Cases', 'One Week Trend: Deaths', 'Total Cases', ' Total Deaths']
-    d = {'One Week Trend: Cases': last_week_data.new_cases,
-         'One Week Trend: Deaths': last_week_data.new_deaths,
-         'Total Cases': totals.total_cases,
-         'Total Deaths': totals.total_deaths}
+    totals = no_world.groupby(by = 'location').sum()
+    d = {'One Week Trend: Cases': x.new_cases,
+         'One Week Trend: Deaths': x.new_deaths,
+         'Total Cases': totals.new_cases,
+         'Total Deaths': totals.new_deaths}
     combined_df = pd.DataFrame(data = d)
     combined_df.fillna(0, inplace = True)
-    sorted_df = combined_df.sort_values(by = column_name, ascending = False)
-    scale = sorted_df[column_name].max()/10000
-    sub_df = sorted_df
+
+    scale = 100
     trace = go.Scattergeo(
     locationmode = 'country names',
-    locations = sub_df.index,
-    text = sub_df[column_name],
+    locations = combined_df.index,
+    text = combined_df[column_name],
     marker = dict(
-        size = sub_df[column_name]/scale,
+        size = combined_df[column_name]/scale,
         color = 'red',
         line_color='rgb(40,40,40)',
         line_width=1,
@@ -539,10 +536,8 @@ def create_map(column_name):
                 oceancolor = '#333333',
                 showlakes = True,
                 lakecolor = 'white',
-
         ))
     }
-
 #### render tabs
 @app.callback(
     Output('render_page', 'children'),
