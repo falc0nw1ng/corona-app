@@ -149,13 +149,13 @@ country_layout = html.Div([
     ]),
         html.Div([
             dcc.Graph(id = 'country_pie_graph',
-                style = {'width':'75%'}
+                style = {'width':'70%'}
                 ),
             html.Div(id = 'death_rate',
                 style = {
                     'color':'white', 'font-size':'18px', 'textAlign':'center', 'width':'20%', 'margin':'auto'}
                     )
-        ], style = {'display':'flex', 'width':'80%'}
+        ], style = {'display':'flex', 'width':'100%'}
         ),
 
 ], style = {'vertical-align':'top', 'backgroundColor':'#333333'})
@@ -361,7 +361,7 @@ def bar_graph(country_dropdown, metric_dropdown, log_radio):
 ############# pie graph + death rate
 
 @app.callback(
-    Output('country_pie_graph', "figure"),
+    Output("country_pie_graph", "figure"),
     [Input("country_dropdown", "value")]
 )
 
@@ -488,7 +488,6 @@ def global_bar_graph(metric_dropdown2, log_radio2):
     [Input('radio_map', 'value')]
 )
 
-### working prototype
 def create_map(column_name):
     totals = no_world.groupby(by = 'location').sum()
     d = {'One Week Trend: Cases': x.new_cases,
