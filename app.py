@@ -154,7 +154,7 @@ country_layout = html.Div([
                 ),
             html.Div(id = 'death_rate',
                 style = {
-                    'color':'white', 'font-size':'18px', 'textAlign':'center', 'width':'18%', 'display':'inline-block', 'float':'left'}
+                    'color':'white', 'font-size':'18px', 'width':'18%', 'display':'inline-block', 'float':'left', 'padding-top':'10%'}
                     )
         ], style = {'width':'90%', 'display':'inline-block'}
         ),
