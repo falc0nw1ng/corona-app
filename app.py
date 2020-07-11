@@ -98,7 +98,11 @@ app.layout = html.Div([
             dcc.Tab(label = 'Around the World', value = 'global', style = tab_style, selected_style = tab_selected_style),
         ],style = {'height': '50px'}),
     html.Div(id = 'render_page'),
-
+    html.Div([
+        html.P("Further details about me and the data sources can be found ", style = {'color':'white', 'display':'inline'}),
+        html.A("here", href = "https://therealmaplejordan.com/", style = {'display':'inline', 'color':'#cf082f'})
+        ], style = {'display':'inline'}
+    )
 ],style = {'width':'80%', 'margin':'auto', 'backgroundColor':'#333333', 'height':'100%'}
 )
 
@@ -372,7 +376,7 @@ def pie_graph(country_dropdown):
     return{
         'data':([
             {
-                'values':[country.total_cases.iloc[-1], country.total_deaths.iloc[-1]] , 'type':'pie', 'labels':['Confirmed', 'Deaths'], 'marker' : {
+                'values':[(country.total_cases.iloc[-1] - country.total_deaths.iloc[-1]), country.total_deaths.iloc[-1]] , 'type':'pie', 'labels':['Survived', 'Deaths'], 'marker' : {
                     'colors':['lightgreen','red'],
                     'line':{
                         'color':'black',
@@ -409,7 +413,7 @@ def death_rate(country_dropdown):
     if global_death_rate > country_death_rate:
         return [
             html.Div([
-                html.P("The country of {} is doing worst than the global average death rate of {}%" .format(country_dropdown, global_death_rate*100))
+                html.P("The country of {} is doing better than the global average death rate of {}%" .format(country_dropdown, global_death_rate*100))
             ])
         ]
     elif global_death_rate == country_death_rate:
@@ -421,7 +425,7 @@ def death_rate(country_dropdown):
     elif global_death_rate < country_death_rate:
         return [
             html.Div([
-                html.P("The country of {} is doing better than the global average death rate of {}%" .format(country_dropdown, global_death_rate*100))
+                html.P("The country of {} is doing worse than the global average death rate of {}%" .format(country_dropdown, global_death_rate*100))
             ])
         ]
     else:
