@@ -89,7 +89,7 @@ server = app.server #uncomment this for deployment
 app.layout = html.Div([
     html.Div(
         children = [
-            html.H1('Just Another Coronavirus Dashboard',
+            html.H1('Just Another COVID - 19 Dashboard',
                 style = {'font-family':'Helvetica narrow, sans-serif', 'fontWeight':'lighter', 'color':'white', 'margin':'auto', 'padding-top':'5px', 'padding-left':'5px'})
         ]),
     dcc.Tabs(id = 'tabs', value = 'country',
@@ -97,7 +97,8 @@ app.layout = html.Div([
             dcc.Tab(label = 'By Country', value = 'country', style = tab_style, selected_style = tab_selected_style),
             dcc.Tab(label = 'Around the World', value = 'global', style = tab_style, selected_style = tab_selected_style),
         ],style = {'height': '50px'}),
-    html.Div(id = 'render_page')
+    html.Div(id = 'render_page'),
+
 ],style = {'width':'80%', 'margin':'auto', 'backgroundColor':'#333333', 'height':'100%'}
 )
 
@@ -149,14 +150,15 @@ country_layout = html.Div([
     ]),
         html.Div([
             dcc.Graph(id = 'country_pie_graph',
-                style = {'width':'70%'}
+                style = {'width':'70%', 'display':'inline-block', 'float':'left'}
                 ),
             html.Div(id = 'death_rate',
                 style = {
-                    'color':'white', 'font-size':'18px', 'textAlign':'center', 'width':'20%', 'margin':'auto'}
+                    'color':'white', 'font-size':'18px', 'textAlign':'center', 'width':'18%', 'display':'inline-block', 'float':'left'}
                     )
-        ], style = {'display':'flex', 'width':'100%'}
+        ], style = {'width':'90%', 'display':'inline-block'}
         ),
+
 
 ], style = {'vertical-align':'top', 'backgroundColor':'#333333'})
 
