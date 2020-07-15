@@ -404,28 +404,29 @@ def death_rate(country_dropdown):
     country = no_world[no_world['location'] == country_dropdown]
     dead = country.total_deaths.iloc[-1]
     cases = country.total_cases.iloc[-1]
-    country_death_rate = dead/cases
+    country_death_rate = (dead/cases).round(3)
 
     global_cases = no_world.new_cases.sum()
     global_deaths = no_world.new_deaths.sum()
     global_death_rate = (global_deaths/global_cases).round(3)
+    global_rate = (global_death_rate*100).round(3)
 
     if global_death_rate > country_death_rate:
         return [
             html.Div([
-                html.P("The country of {} is doing better than the global average death rate of {}%" .format(country_dropdown, global_death_rate*100))
+                html.P("The country of {} is doing better than the global average death rate of {}%" .format(country_dropdown, global_rate))
             ])
         ]
     elif global_death_rate == country_death_rate:
         return [
             html.Div([
-                html.P("The country of {} has the same death rate, as the global average of {}%" .format(country_dropdown, global_death_rate*100))
+                html.P("The country of {} has the same death rate, as the global average of {}%" .format(country_dropdown, global_rate))
             ])
         ]
     elif global_death_rate < country_death_rate:
         return [
             html.Div([
-                html.P("The country of {} is doing worse than the global average death rate of {}%" .format(country_dropdown, global_death_rate*100))
+                html.P("The country of {} is doing worse than the global average death rate of {}%" .format(country_dropdown, global_rate))
             ])
         ]
     else:
