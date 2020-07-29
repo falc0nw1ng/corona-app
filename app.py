@@ -503,14 +503,14 @@ def create_map(column_name):
          'Total Deaths': totals.new_deaths}
     combined_df = pd.DataFrame(data = d)
     combined_df.fillna(0, inplace = True)
-
+    combined_df = combined_df.abs()
     scale = 100
     trace = go.Scattergeo(
     locationmode = 'country names',
     locations = combined_df.index,
     text = combined_df[column_name],
     marker = dict(
-        size = combined_df[column_name]/scale,
+        size = (combined_df[column_name]/scale),
         color = 'red',
         line_color='rgb(40,40,40)',
         line_width=1,
