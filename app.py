@@ -99,7 +99,8 @@ app.layout = html.Div([
         ],style = {'height': '50px'}),
     html.Div(id = 'render_page'),
     html.Div([
-        html.P("Further details about me and the data sources can be found ", style = {'color':'white', 'display':'inline'}),
+        html.P("Further details about the auther and the data sources can be found ", style = {
+            'color':'white', 'display':'inline', 'padding-left':'5px'}),
         html.A("here", href = "https://therealmaplejordan.com/", style = {'display':'inline', 'color':'#cf082f'})
         ], style = {'display':'inline'}
     )
