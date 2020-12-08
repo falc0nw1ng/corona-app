@@ -15,8 +15,6 @@ country_list = df.location.unique()
 
 no_world = df.query("location != 'World'")
 no_world = no_world.query("location != 'International'")
-no_world = no_world.query("location !='Hong Kong'")
-no_world = no_world.query("location != 'Spain'")
 no_world.fillna(0, inplace = True)
 most_recent_date = no_world.date.iloc[-1]
 
@@ -99,7 +97,7 @@ app.layout = html.Div([
         ],style = {'height': '50px'}),
     html.Div(id = 'render_page'),
     html.Div([
-        html.P("Further details about the auther and the data sources can be found ", style = {
+        html.P("Further details about the author and the data sources can be found ", style = {
             'color':'white', 'display':'inline', 'padding-left':'5px'}),
         html.A("here", href = "https://therealmaplejordan.com/", style = {'display':'inline', 'color':'#cf082f'})
         ], style = {'display':'inline'}
