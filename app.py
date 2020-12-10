@@ -23,7 +23,6 @@ def one_week_trends():
     last_week = no_world[(no_world['date'] >= no_world.date.iloc[-7])]
     grouped_week = last_week.groupby('location').sum()
     return grouped_week
-
 x =one_week_trends()
 
 global_map_metric = ['One Week Trend: Cases', 'One Week Trend: Deaths', 'Total Cases', 'Total Deaths']
@@ -66,7 +65,6 @@ tab_style = {
     'color':'white',
     'box-shadow':'1px 1px 1px lightgray'
 }
-
 tab_selected_style = {
     'borderTop': '1px solid lightgray',
     'borderBottom': '1px solid lightgray',
@@ -84,6 +82,7 @@ app = dash.Dash(__name__)
 app.config.suppress_callback_exceptions = True
 server = app.server #uncomment this for deployment
 
+
 app.layout = html.Div([
     html.Div(
         children = [
@@ -99,11 +98,10 @@ app.layout = html.Div([
     html.Div([
         html.P("Further details about the author and the data sources can be found ", style = {
             'color':'white', 'display':'inline', 'padding-left':'5px'}),
-        html.A("here", href = "https://therealmaplejordan.com/", style = {'display':'inline', 'color':'#cf082f'})
-        ], style = {'display':'inline'}
+        html.A("here", href = "https://therealmaplejordan.com/", style = {'display':'inline', 'color':'#cf082f', 'padding-right':'15px'})
+        ], style = {'display':'inline','float':'right'}
     )
-],style = {'width':'80%', 'margin':'auto', 'backgroundColor':'#333333', 'height':'100%'}
-)
+])
 
 # country_page
 country_layout = html.Div([
@@ -120,7 +118,7 @@ country_layout = html.Div([
     html.Div([
         html.Div([
             html.P('Select a country and the displayed data you want here:',
-            style = {'font-size':'25px', 'color':'white', 'width':'95%', 'margin':'auto'}
+            style = {'font-size':'25px', 'color':'white', 'width':'95%', 'margin':'auto', 'padding-top':'10px'}
             ),
             html.Br(),
             html.Div([
@@ -147,10 +145,12 @@ country_layout = html.Div([
         ], style = {'width':'100%', 'display':'inline-block', 'margin':'auto'}
         ),
         html.Div([
-            dcc.Graph(id = 'bar_graph',)
-        ], style = {'display':'inline-block', 'width':'100%'}
+            html.Div(id='sidebar', style={'width':'25%', 'float':'left', 'padding-left':'10px'}),
+            dcc.Graph(id = 'bar_graph', style={'width':'70%', 'float':'left'})
+        ], style = {'display':'inline-block', 'width':'100%', 'verticalAlign':'top'}
         ),
     ]),
+        html.Div(id='reproduction_rate_vs_total_cases', style={'width':'37%', 'float':'left', 'padding-left':'15px'}),
         html.Div([
             dcc.Graph(id = 'country_pie_graph',
                 style = {'width':'70%', 'display':'inline-block', 'float':'left'}
@@ -159,11 +159,31 @@ country_layout = html.Div([
                 style = {
                     'color':'white', 'font-size':'18px', 'width':'18%', 'display':'inline-block', 'float':'left', 'padding-top':'10%'}
                     )
-        ], style = {'width':'90%', 'display':'inline-block'}
+        ], style = {'width':'60%', 'display':'inline-block', 'float':'left'}
         ),
 
 
 ], style = {'vertical-align':'top', 'backgroundColor':'#333333'})
+
+
+gdp_vs_total_testing = no_world[no_world['date']==most_recent_date][['total_tests_per_thousand', 'gdp_per_capita','location','continent','positive_rate']]
+gdp_vs_total_testing.fillna(0,inplace=True)
+gdp_testing_scatter = px.scatter(gdp_vs_total_testing, x='gdp_per_capita', y='total_tests_per_thousand', size='positive_rate', color='continent',hover_data=['location'])
+gdp_testing_scatter.update_layout(
+    plot_bgcolor='#333333',
+    paper_bgcolor='#333333',
+    font=dict(
+        color='white'
+    ),
+    xaxis=dict(
+        title='GDP per Capita'
+    ),
+    yaxis=dict(
+        title='Total Test per Thousand'
+    ),
+    title='Total Test per Thousands vs GDP per Capita'
+)
+
 
 global_layout = html.Div([
     html.Div([
@@ -224,7 +244,8 @@ global_layout = html.Div([
         ),
         ], style = {'width':'95%','margin':'auto'}),
     html.Div([
-        dcc.Graph(id = 'global_bar_graph')
+        dcc.Graph(figure=gdp_testing_scatter, style={'width':'38%','float':'left', 'padding-top':'20px', 'padding-left':'15px'}),
+        dcc.Graph(id = 'global_bar_graph', style={'width':'60%', 'float':'left'})
         ],
         style = {'width':'100%'}
         ),
@@ -237,7 +258,6 @@ global_layout = html.Div([
     Output("daily_country_cases", "children"),
     [Input('country_dropdown', 'value')]
 )
-
 def daily_country_cases(country_dropdown):
     country = no_world[no_world['location'] == country_dropdown]
     daily_cases = country.new_cases.iloc[-1]
@@ -257,7 +277,6 @@ def daily_country_cases(country_dropdown):
     Output("daily_country_deaths", "children"),
     [Input("country_dropdown", "value")]
 )
-
 def daily_country_deaths(country_dropdown):
     country = no_world[no_world['location'] == country_dropdown]
     daily_deaths = country.new_deaths.iloc[-1]
@@ -277,7 +296,6 @@ def daily_country_deaths(country_dropdown):
     Output("total_country_cases", "children"),
     [Input("country_dropdown", 'value')]
 )
-
 def total_country_cases(country_dropdown):
     country = no_world[no_world['location'] == country_dropdown]
     total_cases = country.total_cases.iloc[-1]
@@ -297,7 +315,6 @@ def total_country_cases(country_dropdown):
     Output("total_country_deaths", "children"),
     [Input("country_dropdown", "value")]
 )
-
 def total_country_deaths(country_dropdown):
     country = no_world[no_world['location'] == country_dropdown]
     total_deaths = country.total_deaths.iloc[-1]
@@ -311,6 +328,50 @@ def total_country_deaths(country_dropdown):
         ])
     ]
 
+
+##sidebar
+### shows gdp, positivity rate, tests per cases,
+@app.callback(
+    Output('sidebar', 'children'),
+    [Input('country_dropdown', 'value')]
+)
+def sidebar(country_dropdown):
+    country = no_world[no_world['location'] == country_dropdown]
+    total_test_per_thousand = country['total_tests_per_thousand'].iloc[-2]
+    positivity_rate = country['positive_rate'].iloc[-2]
+    tests_per_case = country['tests_per_case'].iloc[-2]
+
+    return html.Div(
+        children=[
+            html.P('Testing Statistics in {}' .format(country_dropdown), style={'padding-left':'20px', 'padding-top':'10px', 'font-size':'20px'}),
+            html.P('Total Test per Thousand:', style={ 'border-top':'1px', 'border-left':'1px',
+                'border-right':'1px', 'border-bottom':'0','borderColor':'lightgray',
+                'margin':'30px 10px 0 10px', 'border-style':'solid', 'padding':'20px 20px 15px 20px'}),
+            html.P('{}'.format(round(total_test_per_thousand,2)), style={'border-top':'0',
+                'border-left':'1px', 'border-right':'1px', 'border-bottom':'1px','borderColor':'lightgray',
+                'margin':'0 10px 0 10px', 'border-style':'solid', 'padding':'0 10px 10px 30px'}),
+            html.P('Positivity Rate:', style={ 'border-top':'0', 'border-left':'1px',
+                'border-right':'1px', 'border-bottom':'0','borderColor':'lightgray',
+                'margin':'0 10px 0px 10px', 'border-style':'solid', 'padding':'20px 20px 15px 20px'}),
+            html.P(positivity_rate, style={'border-top':'0',
+                'border-left':'1px', 'border-right':'1px', 'border-bottom':'1px','borderColor':'lightgray',
+                'border-style':'solid','margin':'0 10px 0 10px',
+                'padding':'0 10px 10px 30px'}),
+            html.P('Tests per Cases:', style={ 'border-top':'0', 'border-left':'1px',
+                'border-right':'1px', 'border-bottom':'0','borderColor':'lightgray',
+                'margin':'0 10px 0 10px', 'border-style':'solid', 'padding':'20px 20px 15px 20px'}),
+            html.P(tests_per_case, style={'border-top':'0',
+                'border-left':'1px', 'border-right':'1px', 'border-bottom':'1px','borderColor':'lightgray',
+                'border-style':'solid', 'margin':'0 10px 0 10px',
+                'padding':'0 10px 10px 30px',})
+        ], style={'color':'white', 'font-size':'20px',}
+    )
+
+#style = { 'width': '12%', 'textAlign':'center',
+ #'box-shadow': '2px 2px 2px lightgray', 'display':'table-cell'}
+
+
+
 ### user adjustable bar graph
 @app.callback(
     Output("bar_graph",'figure'),
@@ -318,7 +379,6 @@ def total_country_deaths(country_dropdown):
     Input('metric_dropdown', 'value'),
     Input('log_radio', 'value')]
 )
-
 def bar_graph(country_dropdown, metric_dropdown, log_radio):
     country = no_world[no_world['location'] == country_dropdown]
     return {
@@ -363,13 +423,44 @@ def bar_graph(country_dropdown, metric_dropdown, log_radio):
             }
         }
 
-############# pie graph + death rate
+@app.callback(
+    Output('reproduction_rate_vs_total_cases', 'children'),
+    [Input('country_dropdown', 'value')]
+)
+def reproduction_graph(country_dropdown):
+    country = no_world[no_world['location'] == country_dropdown]
+    fig = go.Figure(
+                go.Scatter(
+                x=country.total_cases_per_million,
+                y=country.reproduction_rate
+            )
+        )
+    fig.update_layout(
+        title='Reproduction Rate vs Total Cases per Million',
+        xaxis=dict(
+            title='Total Cases per Million',
+            gridcolor='#b3b3b3'
+        ),
+        yaxis=dict(
+            title='Reproduction Rate',
+            gridcolor='#b3b3b3'
+        ),
+        paper_bgcolor='#333333',
+        plot_bgcolor='#333333',
+        font=dict(
+            color='white'
+        )
+    )
 
+    return html.Div(
+                dcc.Graph(figure=fig)
+    )
+
+############# pie graph + death rate
 @app.callback(
     Output("country_pie_graph", "figure"),
     [Input("country_dropdown", "value")]
 )
-
 def pie_graph(country_dropdown):
     country = no_world[no_world['location'] == country_dropdown]
     return{
@@ -393,12 +484,10 @@ def pie_graph(country_dropdown):
         }}
 
 ### country vs global death rate comparison
-
 @app.callback(
     Output('death_rate', 'children'),
     [Input('country_dropdown', 'value')]
 )
-
 def death_rate(country_dropdown):
     country = no_world[no_world['location'] == country_dropdown]
     dead = country.total_deaths.iloc[-1]
@@ -443,7 +532,6 @@ def death_rate(country_dropdown):
     [Input('metric_dropdown2', 'value'),
     Input('log_radio2', 'value')]
 )
-
 def global_bar_graph(metric_dropdown2, log_radio2):
     world = df[df['location'] == 'World']
     return {
@@ -493,7 +581,6 @@ def global_bar_graph(metric_dropdown2, log_radio2):
     Output('global_map', 'figure'),
     [Input('radio_map', 'value')]
 )
-
 def create_map(column_name):
     totals = no_world.groupby(by = 'location').sum()
     d = {'One Week Trend: Cases': x.new_cases,
@@ -543,6 +630,7 @@ def create_map(column_name):
                 lakecolor = 'white',
         ))
     }
+
 #### render tabs
 @app.callback(
     Output('render_page', 'children'),
