@@ -169,7 +169,7 @@ country_layout = html.Div([
 
 gdp_vs_total_testing = no_world[no_world['date']==most_recent_date][['total_tests_per_thousand', 'gdp_per_capita','location','continent','positive_rate']]
 gdp_vs_total_testing.fillna(0,inplace=True)
-gdp_testing_scatter = px.scatter(gdp_vs_total_testing, x='gdp_per_capita', y='total_tests_per_thousand', size='positive_rate', color='continent',hover_data=['location'])
+gdp_testing_scatter = px.scatter(gdp_vs_total_testing, x='gdp_per_capita', y='total_tests_per_thousand', size='positive_rate', color='continent',hover_data=['location'], trendline='ols', trendline_color_override='#d46161')
 gdp_testing_scatter.update_layout(
     plot_bgcolor='#333333',
     paper_bgcolor='#333333',
