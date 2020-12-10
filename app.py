@@ -79,6 +79,7 @@ tab_selected_style = {
 }
 
 app = dash.Dash(__name__)
+app.title='Just Another COVID-19 Dashboard'
 app.config.suppress_callback_exceptions = True
 server = app.server #uncomment this for deployment
 
