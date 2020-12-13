@@ -17,6 +17,8 @@ no_world = df.query("location != 'World'")
 no_world = no_world.query("location != 'International'")
 no_world.fillna(0, inplace = True)
 most_recent_date = no_world.date.iloc[-1]
+## needed sometimes since positivity rates are not updated quickly enough within the first couple days
+recent_date = no_world.date.iloc[-3]
 
 def one_week_trends():
     sorted_df = no_world.sort_values(by = 'date', ascending = True)
@@ -167,7 +169,7 @@ country_layout = html.Div([
 ], style = {'vertical-align':'top', 'backgroundColor':'#333333'})
 
 
-gdp_vs_total_testing = no_world[no_world['date']==most_recent_date][['total_tests_per_thousand', 'gdp_per_capita','location','continent','positive_rate']]
+gdp_vs_total_testing = no_world[no_world['date']==recent_date][['total_tests_per_thousand', 'gdp_per_capita','location','continent','positive_rate']]
 gdp_vs_total_testing.fillna(0,inplace=True)
 gdp_testing_scatter = px.scatter(gdp_vs_total_testing, x='gdp_per_capita', y='total_tests_per_thousand', size='positive_rate', color='continent',hover_data=['location'], trendline='ols', trendline_color_override='#d46161')
 gdp_testing_scatter.update_layout(
@@ -337,10 +339,11 @@ def total_country_deaths(country_dropdown):
     [Input('country_dropdown', 'value')]
 )
 def sidebar(country_dropdown):
+    # delay by 5 days due to lag between ocurrance of event and time it takes to update data
     country = no_world[no_world['location'] == country_dropdown]
-    total_test_per_thousand = country['total_tests_per_thousand'].iloc[-2]
-    positivity_rate = country['positive_rate'].iloc[-2]
-    tests_per_case = country['tests_per_case'].iloc[-2]
+    total_test_per_thousand = country['total_tests_per_thousand'].iloc[-5]
+    positivity_rate = country['positive_rate'].iloc[-5]
+    tests_per_case = country['tests_per_case'].iloc[-5]
 
     return html.Div(
         children=[
@@ -424,6 +427,8 @@ def bar_graph(country_dropdown, metric_dropdown, log_radio):
             }
         }
 
+
+### reproduction rate
 @app.callback(
     Output('reproduction_rate_vs_total_cases', 'children'),
     [Input('country_dropdown', 'value')]
