@@ -551,7 +551,7 @@ def global_bar_graph(metric_dropdown2, log_radio2):
         ]),
         'layout':{
             'title':{
-                'text':'Global Daily Deaths vs Date'
+                'text':('Global {} vs Date' .format(convert_column(metric_dropdown2)))
             },
             'yaxis':{
                 'type':'linear' if log_radio2 == 'Linear' else 'log',
