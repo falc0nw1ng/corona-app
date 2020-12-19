@@ -480,6 +480,7 @@ def button_output(country_dropdown, btn1, btn2):
     top_death_rates = all_countries.sort_values(by='total_deaths', ascending=False).head()
     append_selected_country = top_death_rates.append(one_country)
     final_df = append_selected_country
+    final_df.drop_duplicates(inplace=True)
 
     # vs global av
     if 'btn-nclicks-2' in changed_id:
@@ -539,6 +540,7 @@ def button_output(country_dropdown, btn1, btn2):
 
 
 ### country vs global death rate comparison
+#### UNUSED
 @app.callback(
     Output('death_rate', 'children'),
     [Input('country_dropdown', 'value')]
