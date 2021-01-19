@@ -394,11 +394,11 @@ def bar_graph(country_dropdown, metric_dropdown, log_radio):
     country = no_world[no_world['location'] == country_dropdown]
     return {
         'data':([
-            {'x':country.date, 'y':country[metric_dropdown], 'type':'bar', 'name':'Daily Cases for {}'.format(country_dropdown), 'mode':'lines+markers', 'markers':{
+            {'x':country.date, 'y':country[metric_dropdown], 'type':'bar', 'name':'Daily Cases', 'mode':'lines+markers', 'markers':{
             }, 'marker':{
                     'color':'orange',
             }},
-            {'x':country.date, 'y': country[metric_dropdown].rolling(5).mean(), 'type':'line', 'name': 'Moving Average (window = 5 Days)', 'marker':{
+            {'x':country.date, 'y': country[metric_dropdown].rolling(5).mean(), 'type':'line', 'name': 'Moving Average(5d)', 'marker':{
                 'color':'red'
             }}
         ]),
@@ -452,7 +452,7 @@ def vaccine_graph(country_dropdown):
     fig.update_layout(
         title=('Effectiveness of Vaccinations on New Cases' .format(percent_vaccinated)),
         xaxis=dict(
-            title=('Total Vacciations Administered ({}% of population)' .format(percent_vaccinated)),
+            title=('Total Vaccines Administered ({}% of population)' .format(percent_vaccinated)),
             gridcolor='#b3b3b3'
         ),
         yaxis=dict(
