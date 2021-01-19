@@ -27,7 +27,7 @@ def one_week_trends():
     return grouped_week
 x =one_week_trends()
 
-global_map_metric = ['One Week Trend: Cases', 'One Week Trend: Deaths', 'Total Cases', 'Total Deaths']
+global_map_metric = ['One Week Trend: Cases', 'One Week Trend: Deaths', 'Total Cases (In Thousands)', 'Total Deaths']
 metrics_dict = {
     "Daily Cases":'new_cases',
     "Daily Deaths": "new_deaths",
@@ -153,15 +153,13 @@ country_layout = html.Div([
         ], style = {'display':'inline-block', 'width':'100%', 'verticalAlign':'top'}
         ),
     ]),
-        html.Div(id='reproduction_rate_vs_total_cases', style={'width':'37%', 'float':'left', 'padding-left':'15px'}),
+        html.Div(id='vaccine_graph', style={'width':'37%', 'float':'left', 'padding-left':'15px'}),
         html.Div([
-            dcc.Graph(id = 'country_pie_graph',
-                style = {'width':'70%', 'display':'inline-block', 'float':'left'}
+            html.Button('Vs Countries with Most Deaths', id = 'btn-nclicks-1', n_clicks=0, style={'padding':'2%', 'font-weight':'bold', 'backgroundColor':'white', 'margin-left':'2%'}),
+            html.Button('Age Demographic', id = 'btn-nclicks-2', n_clicks=0, style={'padding':'2%', 'font-weight':'bold', 'backgroundColor':'white'}),
+            html.Div(id ='country_pie_bar_graph',
+                #style = {'width':'70%', 'display':'inline-block', 'float':'left'}
                 ),
-            html.Div(id = 'death_rate',
-                style = {
-                    'color':'white', 'font-size':'18px', 'width':'18%', 'display':'inline-block', 'float':'left', 'padding-top':'10%'}
-                    )
         ], style = {'width':'60%', 'display':'inline-block', 'float':'left'}
         ),
 
@@ -222,7 +220,8 @@ global_layout = html.Div([
             ),
             style = {'margin-right':'20px'}
         ),
-        dcc.Graph('global_map',
+        dcc.Graph(id='global_map',
+            config={"scrollZoom": False },
             style = {
                 'height':800,
                 'width':'100%', 'float':'left'
@@ -333,7 +332,7 @@ def total_country_deaths(country_dropdown):
 
 
 ##sidebar
-### shows gdp, positivity rate, tests per cases,
+### tests, positivity rate, tests
 @app.callback(
     Output('sidebar', 'children'),
     [Input('country_dropdown', 'value')]
@@ -344,6 +343,7 @@ def sidebar(country_dropdown):
     total_test_per_thousand = country['total_tests_per_thousand'].iloc[-5]
     positivity_rate = country['positive_rate'].iloc[-5]
     tests_per_case = country['tests_per_case'].iloc[-5]
+    total_vaccines_administered = country['total_vaccinations'].iloc[-2]
 
     return html.Div(
         children=[
@@ -367,7 +367,14 @@ def sidebar(country_dropdown):
             html.P(tests_per_case, style={'border-top':'0',
                 'border-left':'1px', 'border-right':'1px', 'border-bottom':'1px','borderColor':'lightgray',
                 'border-style':'solid', 'margin':'0 10px 0 10px',
-                'padding':'0 10px 10px 30px',})
+                'padding':'0 10px 10px 30px',}),
+            html.P('Total Vaccines Administered:', style={ 'border-top':'0', 'border-left':'1px',
+                'border-right':'1px', 'border-bottom':'0','borderColor':'lightgray', 'font-weight':'bold',
+                'margin':'0 10px 0 10px', 'border-style':'solid', 'padding':'20px 20px 15px 20px', 'color':'green'}),
+            html.P(total_vaccines_administered, style={'border-top':'0',
+                'border-left':'1px', 'border-right':'1px', 'border-bottom':'1px','borderColor':'lightgray',
+                'border-style':'solid', 'margin':'0 10px 0 10px',
+                'padding':'0 10px 10px 30px', 'color':'green', 'font-weight':'bold'})
         ], style={'color':'white', 'font-size':'20px',}
     )
 
@@ -430,25 +437,26 @@ def bar_graph(country_dropdown, metric_dropdown, log_radio):
 
 ### reproduction rate
 @app.callback(
-    Output('reproduction_rate_vs_total_cases', 'children'),
+    Output('vaccine_graph', 'children'),
     [Input('country_dropdown', 'value')]
 )
-def reproduction_graph(country_dropdown):
+def vaccine_graph(country_dropdown):
     country = no_world[no_world['location'] == country_dropdown]
+    percent_vaccinated = round((country.total_vaccinations.iloc[-1]/country.population.iloc[-1])*100,3)
     fig = go.Figure(
                 go.Scatter(
-                x=country.total_cases_per_million,
-                y=country.reproduction_rate
+                x=country.total_vaccinations,
+                y=country.new_cases
             )
         )
     fig.update_layout(
-        title='Reproduction Rate vs Total Cases per Million',
+        title=('Effectiveness of Vaccinations on New Cases' .format(percent_vaccinated)),
         xaxis=dict(
-            title='Total Cases per Million',
+            title=('Total Vacciations Administered ({}% of population)' .format(percent_vaccinated)),
             gridcolor='#b3b3b3'
         ),
         yaxis=dict(
-            title='Reproduction Rate',
+            title='New Cases',
             gridcolor='#b3b3b3'
         ),
         paper_bgcolor='#333333',
@@ -462,34 +470,86 @@ def reproduction_graph(country_dropdown):
                 dcc.Graph(figure=fig)
     )
 
-############# pie graph + death rate
+############# bargraphs comparison between selected country and the top countries for most cases and most deaths
 @app.callback(
-    Output("country_pie_graph", "figure"),
-    [Input("country_dropdown", "value")]
+    Output("country_pie_bar_graph", "children"),
+    [Input("country_dropdown", "value"),
+    Input('btn-nclicks-1', 'n_clicks'),
+    Input('btn-nclicks-2', 'n_clicks')]
 )
-def pie_graph(country_dropdown):
-    country = no_world[no_world['location'] == country_dropdown]
-    return{
-        'data':([
-            {
-                'values':[(country.total_cases.iloc[-1] - country.total_deaths.iloc[-1]), country.total_deaths.iloc[-1]] , 'type':'pie', 'labels':['Survived', 'Deaths'], 'marker' : {
-                    'colors':['lightgreen','red'],
-                    'line':{
-                        'color':'black',
-                        'width':'2'
-            }}}
-        ]),
-        'layout':{
-            'title':{
-                'text':'Death rate in {}' .format(country_dropdown)
-        },
-        'paper_bgcolor':'#333333',
-        'font':{
-            'color':'white'
-        }
-        }}
+def button_output(country_dropdown, btn1, btn2):
+    changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+
+    all_countries = no_world[no_world['date']==recent_date][['location','total_cases', 'total_deaths','gdp_per_capita', 'population', 'life_expectancy', 'median_age','aged_70_older']]
+    all_countries['Death per Case'] = (all_countries.total_deaths/all_countries.total_cases)
+    all_countries['Deaths per Population'] = (all_countries.total_deaths/all_countries.population)
+    all_countries['Cases per Population'] = (all_countries.total_cases/all_countries.population)
+    one_country = all_countries[all_countries['location']==country_dropdown]
+    #one_country = all_countries.query('location=={}' .format(country_dropdown))
+    top_death_rates = all_countries.sort_values(by='total_deaths', ascending=False).head()
+    append_selected_country = top_death_rates.append(one_country)
+    final_df = append_selected_country
+    final_df.drop_duplicates(inplace=True)
+
+    # vs global av
+    if 'btn-nclicks-2' in changed_id:
+        fig = go.Figure()
+        fig.add_trace(go.Bar(name='Aged 70 or Older (Percentage)',x=final_df['location'], y=final_df['aged_70_older'],
+            marker=dict(color='#2a5b9c')))
+        fig.add_trace(go.Bar(name='Life Expectancy (Years)', x=final_df['location'], y=final_df['life_expectancy'],
+            marker=dict(color='#228a2e')))
+        fig.add_trace(go.Bar(name='Median Age (Years)', x=final_df['location'], y=final_df['median_age'],
+            marker=dict(color='#ab983a')))
+        fig.update_layout(
+            title='Age Demographic',
+            plot_bgcolor='#333333',
+            paper_bgcolor='#333333',
+            font=dict(
+                color='white'
+            ),
+        )
+    elif 'btn-nclicks-1' in changed_id:
+        fig = go.Figure()
+        fig.add_trace(go.Bar(name='Death per Case', y=final_df['location'], x=final_df['Death per Case']*100, orientation='h',
+            marker=dict(color='#9c2a2a')))
+        fig.add_trace(go.Bar(name='Deaths per Population', y=final_df['location'], x=final_df['Deaths per Population']*100, orientation='h',
+            marker=dict(color='#9c472a')))
+        fig.add_trace(go.Bar(name='Cases Per Population', y=final_df['location'], x=final_df['Cases per Population']*100, orientation='h',
+            marker=dict(color='#742a9c')))
+        fig.update_layout(
+            title='Deaths and Cases in Percentage',
+            plot_bgcolor='#333333',
+            paper_bgcolor='#333333',
+            font=dict(
+                color='white'
+            )
+        )
+    # vs top countries for total deaths
+    else:
+        fig = go.Figure()
+        fig.add_trace(go.Bar(name='Death per Case', y=final_df['location'], x=final_df['Death per Case']*100, orientation='h',
+            marker=dict(color='#9c2a2a')))
+        fig.add_trace(go.Bar(name='Deaths per Population', y=final_df['location'], x=final_df['Deaths per Population']*100, orientation='h',
+            marker=dict(color='#9c472a')))
+        fig.add_trace(go.Bar(name='Cases Per Population', y=final_df['location'], x=final_df['Cases per Population']*100, orientation='h',
+            marker=dict(color='#742a9c')))
+        fig.update_layout(
+            title='Deaths and Cases in Percentage',
+            plot_bgcolor='#333333',
+            paper_bgcolor='#333333',
+            font=dict(
+                color='white'
+            )
+        )
+    return html.Div(
+        dcc.Graph(figure = fig)
+    )
+
+
+
 
 ### country vs global death rate comparison
+#### UNUSED
 @app.callback(
     Output('death_rate', 'children'),
     [Input('country_dropdown', 'value')]
@@ -590,9 +650,10 @@ def global_bar_graph(metric_dropdown2, log_radio2):
 )
 def create_map(column_name):
     totals = no_world.groupby(by = 'location').sum()
+    scaled_total_case = (totals.new_cases)/1000
     d = {'One Week Trend: Cases': x.new_cases,
          'One Week Trend: Deaths': x.new_deaths,
-         'Total Cases': totals.new_cases,
+         'Total Cases (In Thousands)': (scaled_total_case),
          'Total Deaths': totals.new_deaths}
     combined_df = pd.DataFrame(data = d)
     combined_df.fillna(0, inplace = True)
@@ -635,7 +696,7 @@ def create_map(column_name):
                 oceancolor = '#333333',
                 showlakes = True,
                 lakecolor = 'white',
-        ))
+        )),
     }
 
 #### render tabs

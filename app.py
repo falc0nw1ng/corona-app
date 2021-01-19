@@ -153,9 +153,9 @@ country_layout = html.Div([
         ], style = {'display':'inline-block', 'width':'100%', 'verticalAlign':'top'}
         ),
     ]),
-        html.Div(id='reproduction_rate_vs_total_cases', style={'width':'37%', 'float':'left', 'padding-left':'15px'}),
+        html.Div(id='vaccine_graph', style={'width':'37%', 'float':'left', 'padding-left':'15px'}),
         html.Div([
-            html.Button('Vs Countries with Most Deaths', id = 'btn-nclicks-1', n_clicks=0, style={'padding':'2%', 'font-weight':'bold', 'backgroundColor':'white'}),
+            html.Button('Vs Countries with Most Deaths', id = 'btn-nclicks-1', n_clicks=0, style={'padding':'2%', 'font-weight':'bold', 'backgroundColor':'white', 'margin-left':'2%'}),
             html.Button('Age Demographic', id = 'btn-nclicks-2', n_clicks=0, style={'padding':'2%', 'font-weight':'bold', 'backgroundColor':'white'}),
             html.Div(id ='country_pie_bar_graph',
                 #style = {'width':'70%', 'display':'inline-block', 'float':'left'}
@@ -332,7 +332,7 @@ def total_country_deaths(country_dropdown):
 
 
 ##sidebar
-### shows gdp, positivity rate, tests per cases,
+### tests, positivity rate, tests
 @app.callback(
     Output('sidebar', 'children'),
     [Input('country_dropdown', 'value')]
@@ -343,6 +343,7 @@ def sidebar(country_dropdown):
     total_test_per_thousand = country['total_tests_per_thousand'].iloc[-5]
     positivity_rate = country['positive_rate'].iloc[-5]
     tests_per_case = country['tests_per_case'].iloc[-5]
+    total_vaccines_administered = country['total_vaccinations'].iloc[-2]
 
     return html.Div(
         children=[
@@ -366,7 +367,14 @@ def sidebar(country_dropdown):
             html.P(tests_per_case, style={'border-top':'0',
                 'border-left':'1px', 'border-right':'1px', 'border-bottom':'1px','borderColor':'lightgray',
                 'border-style':'solid', 'margin':'0 10px 0 10px',
-                'padding':'0 10px 10px 30px',})
+                'padding':'0 10px 10px 30px',}),
+            html.P('Total Vaccines Administered:', style={ 'border-top':'0', 'border-left':'1px',
+                'border-right':'1px', 'border-bottom':'0','borderColor':'lightgray', 'font-weight':'bold',
+                'margin':'0 10px 0 10px', 'border-style':'solid', 'padding':'20px 20px 15px 20px', 'color':'green'}),
+            html.P(total_vaccines_administered, style={'border-top':'0',
+                'border-left':'1px', 'border-right':'1px', 'border-bottom':'1px','borderColor':'lightgray',
+                'border-style':'solid', 'margin':'0 10px 0 10px',
+                'padding':'0 10px 10px 30px', 'color':'green', 'font-weight':'bold'})
         ], style={'color':'white', 'font-size':'20px',}
     )
 
@@ -429,25 +437,26 @@ def bar_graph(country_dropdown, metric_dropdown, log_radio):
 
 ### reproduction rate
 @app.callback(
-    Output('reproduction_rate_vs_total_cases', 'children'),
+    Output('vaccine_graph', 'children'),
     [Input('country_dropdown', 'value')]
 )
-def reproduction_graph(country_dropdown):
+def vaccine_graph(country_dropdown):
     country = no_world[no_world['location'] == country_dropdown]
+    percent_vaccinated = round((country.total_vaccinations.iloc[-1]/country.population.iloc[-1])*100,3)
     fig = go.Figure(
                 go.Scatter(
-                x=country.total_cases_per_million,
-                y=country.reproduction_rate
+                x=country.total_vaccinations,
+                y=country.new_cases
             )
         )
     fig.update_layout(
-        title='Reproduction Rate vs Total Cases per Million',
+        title=('Effectiveness of Vaccinations on New Cases' .format(percent_vaccinated)),
         xaxis=dict(
-            title='Total Cases per Million',
+            title=('Total Vacciations Administered ({}% of population)' .format(percent_vaccinated)),
             gridcolor='#b3b3b3'
         ),
         yaxis=dict(
-            title='Reproduction Rate',
+            title='New Cases',
             gridcolor='#b3b3b3'
         ),
         paper_bgcolor='#333333',
