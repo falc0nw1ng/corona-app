@@ -394,7 +394,7 @@ def bar_graph(country_dropdown, metric_dropdown, log_radio):
     country = no_world[no_world['location'] == country_dropdown]
     return {
         'data':([
-            {'x':country.date, 'y':country[metric_dropdown], 'type':'bar', 'name':'Daily Cases', 'mode':'lines+markers', 'markers':{
+            {'x':country.date, 'y':country[metric_dropdown], 'type':'bar', 'name':convert_column(metric_dropdown), 'mode':'lines+markers', 'markers':{
             }, 'marker':{
                     'color':'orange',
             }},
@@ -606,7 +606,7 @@ def global_bar_graph(metric_dropdown2, log_radio2):
             {'x': world.date, 'y': world[metric_dropdown2], 'type':'bar', 'name': convert_column(metric_dropdown2), 'marker':{
                 'color':'orange'
             }},
-            {'x': world.date, 'y': world[metric_dropdown2].rolling(5).mean(),'name':'Moving Average (window = 5 Days)', 'type':'line', 'marker':{
+            {'x': world.date, 'y': world[metric_dropdown2].rolling(5).mean(),'name':'Moving Average(5d)', 'type':'line', 'marker':{
                 'color':'red'
             }}
         ]),
