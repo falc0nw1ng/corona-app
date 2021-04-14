@@ -14,11 +14,20 @@ df = pd.read_csv("https://raw.githubusercontent.com/owid/covid-19-data/master/pu
 country_list = df.location.unique()
 
 no_world = df.query("location != 'World'")
+no_world = no_world.query("location != 'North America'")
+no_world = no_world.query("location != 'South America'")
+no_world = no_world.query("location != 'Africa'")
+no_world = no_world.query("location != 'Asia'")
+no_world = no_world.query("location != 'Europe'")
+no_world = no_world.query("location != 'European Union'")
 no_world = no_world.query("location != 'International'")
 no_world.fillna(0, inplace = True)
 most_recent_date = no_world.date.iloc[-1]
 ## needed sometimes since positivity rates are not updated quickly enough within the first couple days
 recent_date = no_world.date.iloc[-3]
+
+print(no_world.location.unique())
+
 
 def one_week_trends():
     sorted_df = no_world.sort_values(by = 'date', ascending = True)
@@ -45,8 +54,6 @@ def convert_column(column_name):
     elif column_name == "total_deaths":
         return "Cumulative Deaths"
 
-##global boxes, world data
-no_world = df.query("location != 'World'")
 
 global_daily_cases = no_world[no_world['date'] == most_recent_date].new_cases.sum()
 global_daily_deaths = no_world[no_world['date'] == most_recent_date].new_deaths.sum()
